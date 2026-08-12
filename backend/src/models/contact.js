@@ -12,8 +12,7 @@ const contactSchema = new mongoose.Schema(
             type: String,
             required: true,
             trim: true,
-            lowercase: true,
-            unique: true
+            lowercase: true
         },
 
         subject: {
@@ -29,11 +28,7 @@ const contactSchema = new mongoose.Schema(
 
         status: {
             type: String,
-            enum: [
-                "unread",
-                "read",
-                "replied"
-            ],
+            enum: ["unread", "read", "replied"],
             default: "unread"
         }
     },

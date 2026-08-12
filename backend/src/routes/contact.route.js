@@ -1,5 +1,4 @@
 import express from "express";
-import protect from "../middleware/auth.middleware.js";
 
 import {
     createContact,
@@ -8,12 +7,15 @@ import {
     deleteContact
 } from "../controllers/contact.controller.js";
 
+import protect from "../middleware/auth.middleware.js";
+
 const router = express.Router();
 
+// Public contact form
+router.post("/", createContact);
 
-router.post("/", protect, createContact);
-
-router.get("/", getContacts);
+// Admin routes
+router.get("/", protect, getContacts);
 
 router.patch("/:id/status", protect, updateContactStatus);
 
