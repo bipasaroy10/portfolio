@@ -1,13 +1,17 @@
 import { useState } from "react";
 import { sendContactMessage } from "../services/api";
+import { useSettings } from "../context/SettingsContext";
 
 const Contact = () => {
+    const { settings } = useSettings();
+
     const [formData, setFormData] = useState({
         name: "",
         email: "",
         subject: "",
         message: ""
     });
+
 
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState("");
@@ -30,7 +34,8 @@ const Contact = () => {
         setError("");
 
         try {
-            const response = await sendContactMessage(formData);
+            const response =
+                await sendContactMessage(formData);
 
             if (response.success) {
                 setSuccess(
@@ -45,15 +50,22 @@ const Contact = () => {
                 });
             } else {
                 setError(
-                    response.message || "Failed to send message"
+                    response.message ||
+                    "Failed to send message"
                 );
             }
+
         } catch (error) {
-            console.error("Contact error:", error);
+            console.error(
+                "Contact error:",
+                error
+            );
 
             setError(
-                error.message || "Failed to send message"
+                error.message ||
+                "Failed to send message"
             );
+
         } finally {
             setLoading(false);
         }
@@ -66,7 +78,10 @@ const Contact = () => {
         >
             <div className="max-w-5xl mx-auto">
 
+                {/* Header */}
+
                 <div className="mb-12">
+
                     <p className="text-sm font-semibold uppercase tracking-wider text-gray-500">
                         Get In Touch
                     </p>
@@ -79,12 +94,13 @@ const Contact = () => {
                         Have a project, opportunity, or just want to
                         connect? Feel free to send me a message.
                     </p>
+
                 </div>
 
 
                 <div className="grid md:grid-cols-2 gap-12">
 
-                    {/* Contact information */}
+                    {/* Contact Information */}
 
                     <div>
 
@@ -101,57 +117,119 @@ const Contact = () => {
 
                         <div className="space-y-5">
 
-                            <div>
-                                <p className="text-sm text-gray-500">
-                                    Email
-                                </p>
+                            {/* Email */}
 
-                                <p className="font-medium">
-                                    your-email@example.com
-                                </p>
-                            </div>
+                            {settings?.email && (
+                                <div>
 
+                                    <p className="text-sm text-gray-500">
+                                        Email
+                                    </p>
 
-                            <div>
-                                <p className="text-sm text-gray-500">
-                                    GitHub
-                                </p>
+                                    <a
+                                        href={`mailto:${settings.email}`}
+                                        className="font-medium hover:underline"
+                                    >
+                                        {settings.email}
+                                    </a>
 
-                                <a
-                                    href="https://github.com/"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="font-medium hover:underline"
-                                >
-                                    GitHub Profile
-                                </a>
-                            </div>
+                                </div>
+                            )}
 
 
-                            <div>
-                                <p className="text-sm text-gray-500">
-                                    LinkedIn
-                                </p>
+                            {/* Phone */}
 
-                                <a
-                                    href="#"
-                                    className="font-medium hover:underline"
-                                >
-                                    LinkedIn Profile
-                                </a>
-                            </div>
+                            {settings?.phone && (
+                                <div>
+
+                                    <p className="text-sm text-gray-500">
+                                        Phone
+                                    </p>
+
+                                    <a
+                                        href={`tel:${settings.phone}`}
+                                        className="font-medium hover:underline"
+                                    >
+                                        {settings.phone}
+                                    </a>
+
+                                </div>
+                            )}
+
+
+                            {/* Location */}
+
+                            {settings?.location && (
+                                <div>
+
+                                    <p className="text-sm text-gray-500">
+                                        Location
+                                    </p>
+
+                                    <p className="font-medium">
+                                        {settings.location}
+                                    </p>
+
+                                </div>
+                            )}
+
+
+                            {/* GitHub */}
+
+                            {settings?.github && (
+                                <div>
+
+                                    <p className="text-sm text-gray-500">
+                                        GitHub
+                                    </p>
+
+                                    <a
+                                        href={settings.github}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="font-medium hover:underline"
+                                    >
+                                        GitHub Profile
+                                    </a>
+
+                                </div>
+                            )}
+
+
+                            {/* LinkedIn */}
+
+                            {settings?.linkedin && (
+                                <div>
+
+                                    <p className="text-sm text-gray-500">
+                                        LinkedIn
+                                    </p>
+
+                                    <a
+                                        href={settings.linkedin}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="font-medium hover:underline"
+                                    >
+                                        LinkedIn Profile
+                                    </a>
+
+                                </div>
+                            )}
 
                         </div>
 
                     </div>
 
 
-                    {/* Contact form */}
+                    {/* Contact Form */}
 
                     <form
                         onSubmit={handleSubmit}
                         className="space-y-5"
                     >
+
+                        {/* Name */}
 
                         <div>
 
@@ -172,6 +250,8 @@ const Contact = () => {
                         </div>
 
 
+                        {/* Email */}
+
                         <div>
 
                             <label className="block text-sm font-medium mb-2">
@@ -190,6 +270,8 @@ const Contact = () => {
 
                         </div>
 
+
+                        {/* Subject */}
 
                         <div>
 
@@ -210,6 +292,8 @@ const Contact = () => {
                         </div>
 
 
+                        {/* Message */}
+
                         <div>
 
                             <label className="block text-sm font-medium mb-2">
@@ -229,6 +313,8 @@ const Contact = () => {
                         </div>
 
 
+                        {/* Success */}
+
                         {success && (
                             <div className="p-3 rounded-lg bg-green-50 text-green-600">
                                 {success}
@@ -236,12 +322,16 @@ const Contact = () => {
                         )}
 
 
+                        {/* Error */}
+
                         {error && (
                             <div className="p-3 rounded-lg bg-red-50 text-red-600">
                                 {error}
                             </div>
                         )}
 
+
+                        {/* Submit */}
 
                         <button
                             type="submit"

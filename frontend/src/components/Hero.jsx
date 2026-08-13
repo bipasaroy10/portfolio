@@ -1,4 +1,8 @@
+import { useSettings } from "../context/SettingsContext";
+
 const Hero = () => {
+    const { settings } = useSettings();
+
     return (
         <section
             id="home"
@@ -11,16 +15,16 @@ const Hero = () => {
                 </p>
 
                 <h1 className="text-5xl md:text-7xl font-bold mb-6">
-                    abc roy
+                    {settings?.name || "Bipasa Roy"}
                 </h1>
 
                 <h2 className="text-2xl md:text-3xl mb-6">
-                    fullstack Developer
+                    {settings?.title || "Fullstack Developer"}
                 </h2>
 
                 <p className="text-gray-600 max-w-2xl mx-auto mb-8">
-                    I build scalable fullstack applications and REST APIs
-                    using JavaScript, Node.js, Express.js and MongoDB.
+                    {settings?.about ||
+                        "I build scalable fullstack applications and REST APIs using JavaScript, Node.js, Express.js and MongoDB."}
                 </p>
 
                 <div className="flex justify-center gap-4">

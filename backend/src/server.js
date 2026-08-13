@@ -1,6 +1,8 @@
+import "dotenv/config";
+import cloudinary from "./config/cloudinary.js";
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
+
 
 import connectDB from "./config/db.js";
 import projectRoutes from "./routes/project.route.js";
@@ -8,9 +10,11 @@ import skillRoutes from "./routes/skill.route.js";
 import experienceRoutes from "./routes/experience.route.js";
 import contactRoutes from "./routes/contact.route.js";
 import authRoutes from "./routes/auth.route.js";
+import settingsRoutes from "./routes/settings.routes.js";
+import uploadRoutes from "./routes/upload.routes.js";
 
 
-dotenv.config();
+
 
 const app = express();
 
@@ -30,7 +34,8 @@ app.use("/api/skills", skillRoutes);
 app.use("/api/experiences", experienceRoutes);
 app.use("/api/contacts", contactRoutes);
 app.use("/api/auth", authRoutes);
-
+app.use("/api/settings", settingsRoutes);
+app.use("/api/uploads", uploadRoutes);
 
 // Home route
 app.get("/", (req, res) => {

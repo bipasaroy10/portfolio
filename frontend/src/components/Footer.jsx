@@ -1,5 +1,10 @@
+import { useSettings } from "../context/SettingsContext";
+
 const Footer = () => {
-    const currentYear = new Date().getFullYear();
+    const { settings } = useSettings();
+
+    const currentYear =
+        new Date().getFullYear();
 
     return (
         <footer className="border-t py-8 px-6">
@@ -7,26 +12,34 @@ const Footer = () => {
             <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
 
                 <p className="text-sm text-gray-500">
-                    © {currentYear} Bipasa Roy. All rights reserved.
+                    © {currentYear}{" "}
+                    {settings?.name || "Bipasa Roy"}.
+                    {" "}All rights reserved.
                 </p>
 
                 <div className="flex gap-6">
 
-                    <a
-                        href="https://github.com/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm hover:underline"
-                    >
-                        GitHub
-                    </a>
+                    {settings?.github && (
+                        <a
+                            href={settings.github}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm hover:underline"
+                        >
+                            GitHub
+                        </a>
+                    )}
 
-                    <a
-                        href="#"
-                        className="text-sm hover:underline"
-                    >
-                        LinkedIn
-                    </a>
+                    {settings?.linkedin && (
+                        <a
+                            href={settings.linkedin}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm hover:underline"
+                        >
+                            LinkedIn
+                        </a>
+                    )}
 
                     <a
                         href="#home"

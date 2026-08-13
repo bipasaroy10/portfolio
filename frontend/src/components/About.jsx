@@ -1,4 +1,8 @@
+import { useSettings } from "../context/SettingsContext";
+
 const About = () => {
+    const { settings } = useSettings();
+
     return (
         <section
             id="about"
@@ -11,11 +15,8 @@ const About = () => {
                 </h2>
 
                 <p className="text-gray-600 leading-8">
-                    I'm a Computer Science Engineering student and
-                    backend developer interested in building web
-                    applications, REST APIs and database-driven systems.
-                    I work primarily with JavaScript, Node.js,
-                    Express.js and MongoDB.
+                    {settings?.about ||
+                        "I'm a Computer Science Engineering student and backend developer interested in building web applications, REST APIs and database-driven systems. I work primarily with JavaScript, Node.js, Express.js and MongoDB."}
                 </p>
 
             </div>

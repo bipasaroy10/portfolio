@@ -4,32 +4,60 @@ import {
     Route
 } from "react-router-dom";
 
+import {
+    SettingsProvider
+} from "./context/SettingsContext";
+
 import Home from "./pages/Home";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
+
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 function App() {
     return (
         <BrowserRouter>
 
-            <Routes>
+            <SettingsProvider>
 
-                <Route
-                    path="/"
-                    element={<Home />}
-                />
+                <Routes>
 
-                <Route
-                    path="/admin/login"
-                    element={<AdminLogin />}
-                />
+                    {/* Public */}
 
-                <Route
-                    path="/admin/dashboard"
-                    element={<AdminDashboard />}
-                />
+                    <Route
+                        path="/"
+                        element={<Home />}
+                    />
 
-            </Routes>
+
+                    {/* Admin Login */}
+
+                    <Route
+                        path="/admin/login"
+                        element={<AdminLogin />}
+                    />
+
+
+                    {/* Protected Admin */}
+
+                    <Route
+                        element={
+                            <ProtectedRoute />
+                        }
+                    >
+
+                        <Route
+                            path="/admin/dashboard"
+                            element={
+                                <AdminDashboard />
+                            }
+                        />
+
+                    </Route>
+
+                </Routes>
+
+            </SettingsProvider>
 
         </BrowserRouter>
     );
