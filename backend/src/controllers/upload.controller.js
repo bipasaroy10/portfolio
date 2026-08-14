@@ -87,22 +87,20 @@ export const uploadProfileImage = async (
 }
 };
 
-
-// ------------------------------------
-// Upload Resume
-// ------------------------------------
 // ------------------------------------
 // Upload Resume
 // ------------------------------------
 
 export const uploadResume = async (req, res) => {
     try {
+
         if (!req.file) {
             return res.status(400).json({
                 success: false,
                 message: "Resume PDF is required"
             });
         }
+
 
         if (req.file.mimetype !== "application/pdf") {
             return res.status(400).json({
@@ -111,23 +109,26 @@ export const uploadResume = async (req, res) => {
             });
         }
 
+
         const result = await uploadToCloudinary(
             req.file.buffer,
             {
                 folder: "portfolio/resume",
 
-                // PDF is uploaded as a raw resource
-                resource_type: "raw",
+                // Cloudinary supports PDFs as image assets
+                resource_type: "image",
 
-                // Important:
-                // Raw files should have their extension
-                public_id: `resume_${Date.now()}.pdf`
+                // Do NOT put .pdf in image public_id
+                public_id: `resume_${Date.now()}`
             }
         );
 
+
         res.status(200).json({
             success: true,
-            message: "Resume uploaded successfully",
+
+            message:
+                "Resume uploaded successfully",
 
             data: {
                 url: result.secure_url,
@@ -135,7 +136,9 @@ export const uploadResume = async (req, res) => {
             }
         });
 
+
     } catch (error) {
+
         console.error(
             "Resume upload error:",
             error
@@ -143,8 +146,12 @@ export const uploadResume = async (req, res) => {
 
         res.status(500).json({
             success: false,
-            message: "Failed to upload resume",
-            error: error.message
+
+            message:
+                "Failed to upload resume",
+
+            error:
+                error.message
         });
     }
 };
