@@ -64,45 +64,82 @@ export const getContacts = async (req, res) => {
     }
 };
 
-
 export const updateContactStatus = async (req, res) => {
+
     try {
+
         const { id } = req.params;
         const { status } = req.body;
 
-        const contact = await Contact.findByIdAndUpdate(
-            id,
-            { status },
-            {
-                new: true,
-                runValidators: true
-            }
-        );
+        const allowedStatuses = [
+            "unread",
+            "read",
+            "replied"
+        ];
+
+        if (!allowedStatuses.includes(status)) {
+
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Invalid status. Allowed values are unread, read and replied"
+            });
+
+        }
+
+        const contact =
+            await Contact.findByIdAndUpdate(
+                id,
+                { status },
+                {
+                    new: true,
+                    runValidators: true
+                }
+            );
 
         if (!contact) {
+
             return res.status(404).json({
                 success: false,
-                message: "Contact message not found"
+                message:
+                    "Contact message not found"
             });
+
         }
 
         return res.status(200).json({
+
             success: true,
-            message: "Contact status updated",
+
+            message:
+                "Contact status updated successfully",
+
             data: contact
+
         });
 
     } catch (error) {
-        console.error("UPDATE CONTACT ERROR:", error);
+
+        console.error(
+            "UPDATE CONTACT ERROR:",
+            error
+        );
 
         return res.status(500).json({
-            success: false,
-            message: "Failed to update contact",
-            error: error.message
-        });
-    }
-};
 
+            success: false,
+
+            message:
+                "Failed to update contact",
+
+            error:
+                error.message
+
+        });
+
+    }
+
+};
 
 export const deleteContact = async (req, res) => {
     try {

@@ -2,59 +2,97 @@ import { useEffect, useState } from "react";
 
 const API_URL = "http://localhost:5000/api";
 
+const emptyForm = {
+    title: "",
+    description: "",
+    technologies: "",
+    github: "",
+    liveDemo: "",
+    image: "",
+    featured: false
+};
+
+
 const ProjectManager = () => {
+
     const [projects, setProjects] = useState([]);
 
     const [loading, setLoading] = useState(true);
 
+    const [saving, setSaving] = useState(false);
+
+    const [deletingId, setDeletingId] = useState(null);
+
     const [error, setError] = useState("");
+
+    const [success, setSuccess] = useState("");
 
     const [showForm, setShowForm] = useState(false);
 
-    const [editingProject, setEditingProject] = useState(null);
+    const [editingProject, setEditingProject] =
+        useState(null);
 
-    const [formData, setFormData] = useState({
-        title: "",
-        description: "",
-        technologies: "",
-        github: "",
-        liveDemo: "",
-        image: "",
-        featured: false
-    });
+    const [formData, setFormData] =
+        useState(emptyForm);
 
 
-    // --------------------------------
-    // Get JWT token
-    // --------------------------------
+    // =====================================================
+    // TOKEN
+    // =====================================================
 
     const getToken = () => {
-        return localStorage.getItem("adminToken");
+
+        return (
+            localStorage.getItem("adminToken") ||
+            localStorage.getItem("token")
+        );
+
     };
 
 
-    // --------------------------------
-    // Load projects
-    // --------------------------------
+    // =====================================================
+    // LOAD PROJECTS
+    // =====================================================
 
     const loadProjects = async () => {
+
         try {
+
             setLoading(true);
             setError("");
 
+            const token = getToken();
+
             const response = await fetch(
-                `${API_URL}/projects`
+                `${API_URL}/projects`,
+                {
+                    headers: token
+                        ? {
+                            Authorization:
+                                `Bearer ${token}`
+                        }
+                        : {}
+                }
             );
 
-            const data = await response.json();
+
+            const data =
+                await response.json();
+
 
             if (!response.ok) {
+
                 throw new Error(
-                    data.message || "Failed to load projects"
+                    data.message ||
+                    "Failed to load projects"
                 );
+
             }
 
-            setProjects(data.data || []);
+
+            setProjects(
+                data.data || []
+            );
 
         } catch (error) {
 
@@ -63,78 +101,118 @@ const ProjectManager = () => {
                 error
             );
 
-            setError(error.message);
+            setError(
+                error.message ||
+                "Failed to load projects"
+            );
 
         } finally {
 
             setLoading(false);
 
         }
+
     };
 
 
     useEffect(() => {
+
         loadProjects();
+
     }, []);
 
 
-    // --------------------------------
-    // Handle input
-    // --------------------------------
+    // =====================================================
+    // FORM CHANGE
+    // =====================================================
 
     const handleChange = (e) => {
 
-        const { name, value, type, checked } = e.target;
+        const {
+            name,
+            value,
+            type,
+            checked
+        } = e.target;
+
 
         setFormData((previous) => ({
+
             ...previous,
+
             [name]:
                 type === "checkbox"
                     ? checked
                     : value
+
         }));
+
     };
 
 
-    // --------------------------------
-    // Open Add form
-    // --------------------------------
+    // =====================================================
+    // RESET FORM
+    // =====================================================
 
-    const handleAdd = () => {
+    const resetForm = () => {
+
+        setFormData({
+            ...emptyForm
+        });
 
         setEditingProject(null);
 
-        setFormData({
-            title: "",
-            description: "",
-            technologies: "",
-            github: "",
-            liveDemo: "",
-            image: "",
-            featured: false
-        });
-
-        setShowForm(true);
     };
 
 
-    // --------------------------------
-    // Open Edit form
-    // --------------------------------
+    // =====================================================
+    // ADD PROJECT
+    // =====================================================
+
+    const handleAdd = () => {
+
+        setError("");
+        setSuccess("");
+
+        resetForm();
+
+        setShowForm(true);
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+    };
+
+
+    // =====================================================
+    // EDIT PROJECT
+    // =====================================================
 
     const handleEdit = (project) => {
 
+        setError("");
+        setSuccess("");
+
         setEditingProject(project);
 
+
         setFormData({
-            title: project.title || "",
+
+            title:
+                project.title || "",
 
             description:
                 project.description || "",
 
             technologies:
-                Array.isArray(project.technologies)
-                    ? project.technologies.join(", ")
+                Array.isArray(
+                    project.technologies
+                )
+                    ? project.technologies.join(
+                        ", "
+                    )
                     : "",
 
             github:
@@ -148,91 +226,174 @@ const ProjectManager = () => {
 
             featured:
                 project.featured || false
+
         });
 
+
         setShowForm(true);
+
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
     };
 
 
-    // --------------------------------
-    // Submit
-    // --------------------------------
+    // =====================================================
+    // CLOSE FORM
+    // =====================================================
+
+    const handleCancel = () => {
+
+        setShowForm(false);
+
+        resetForm();
+
+        setError("");
+
+    };
+
+
+    // =====================================================
+    // CREATE / UPDATE PROJECT
+    // =====================================================
 
     const handleSubmit = async (e) => {
 
         e.preventDefault();
 
+
         try {
 
+            setSaving(true);
+
             setError("");
-
-            const technologies = formData.technologies
-                .split(",")
-                .map((item) => item.trim())
-                .filter(Boolean);
-
-
-            const payload = {
-                title: formData.title,
-
-                description: formData.description,
-
-                technologies,
-
-                github: formData.github,
-
-                liveDemo: formData.liveDemo,
-
-                image: formData.image,
-
-                featured: formData.featured
-            };
+            setSuccess("");
 
 
             const token = getToken();
 
 
-            const url = editingProject
+            if (!token) {
+
+                throw new Error(
+                    "Admin authentication token is missing. Please login again."
+                );
+
+            }
+
+
+            // Convert comma-separated
+            // technologies into array
+
+            const technologies =
+                formData.technologies
+                    .split(",")
+                    .map(
+                        (item) =>
+                            item.trim()
+                    )
+                    .filter(Boolean);
+
+
+            const payload = {
+
+                title:
+                    formData.title.trim(),
+
+                description:
+                    formData.description.trim(),
+
+                technologies,
+
+                github:
+                    formData.github.trim(),
+
+                liveDemo:
+                    formData.liveDemo.trim(),
+
+                image:
+                    formData.image.trim(),
+
+                featured:
+                    formData.featured
+
+            };
+
+
+            const isEditing =
+                Boolean(editingProject);
+
+
+            const url = isEditing
+
                 ? `${API_URL}/projects/${editingProject._id}`
+
                 : `${API_URL}/projects`;
 
 
-            const method = editingProject
+            const method = isEditing
                 ? "PUT"
                 : "POST";
 
 
-            const response = await fetch(
-                url,
-                {
-                    method,
+            const response =
+                await fetch(
+                    url,
+                    {
 
-                    headers: {
-                        "Content-Type": "application/json",
+                        method,
 
-                        Authorization:
-                            `Bearer ${token}`
-                    },
+                        headers: {
 
-                    body: JSON.stringify(payload)
-                }
-            );
+                            "Content-Type":
+                                "application/json",
+
+                            Authorization:
+                                `Bearer ${token}`
+
+                        },
+
+                        body:
+                            JSON.stringify(
+                                payload
+                            )
+
+                    }
+                );
 
 
-            const data = await response.json();
+            const data =
+                await response.json();
 
 
             if (!response.ok) {
+
                 throw new Error(
                     data.message ||
                     "Failed to save project"
                 );
+
             }
+
+
+            setSuccess(
+
+                isEditing
+
+                    ? "Project updated successfully."
+
+                    : "Project created successfully."
+
+            );
 
 
             setShowForm(false);
 
-            setEditingProject(null);
+            resetForm();
+
 
             await loadProjects();
 
@@ -244,20 +405,32 @@ const ProjectManager = () => {
                 error
             );
 
-            setError(error.message);
+
+            setError(
+                error.message ||
+                "Failed to save project"
+            );
+
+        } finally {
+
+            setSaving(false);
+
         }
+
     };
 
 
-    // --------------------------------
-    // Delete
-    // --------------------------------
+    // =====================================================
+    // DELETE PROJECT
+    // =====================================================
 
     const handleDelete = async (id) => {
 
-        const confirmed = window.confirm(
-            "Are you sure you want to delete this project?"
-        );
+        const confirmed =
+            window.confirm(
+                "Are you sure you want to delete this project?"
+            );
+
 
         if (!confirmed) {
             return;
@@ -266,31 +439,59 @@ const ProjectManager = () => {
 
         try {
 
+            setDeletingId(id);
+
+            setError("");
+            setSuccess("");
+
+
             const token = getToken();
 
 
-            const response = await fetch(
-                `${API_URL}/projects/${id}`,
-                {
-                    method: "DELETE",
+            if (!token) {
 
-                    headers: {
-                        Authorization:
-                            `Bearer ${token}`
+                throw new Error(
+                    "Admin authentication token is missing. Please login again."
+                );
+
+            }
+
+
+            const response =
+                await fetch(
+                    `${API_URL}/projects/${id}`,
+                    {
+
+                        method: "DELETE",
+
+                        headers: {
+
+                            Authorization:
+                                `Bearer ${token}`
+
+                        }
+
                     }
-                }
-            );
+                );
 
 
-            const data = await response.json();
+            const data =
+                await response.json();
 
 
             if (!response.ok) {
+
                 throw new Error(
                     data.message ||
                     "Failed to delete project"
                 );
+
             }
+
+
+            setSuccess(
+                "Project deleted successfully."
+            );
 
 
             await loadProjects();
@@ -303,69 +504,289 @@ const ProjectManager = () => {
                 error
             );
 
-            setError(error.message);
+
+            setError(
+                error.message ||
+                "Failed to delete project"
+            );
+
+        } finally {
+
+            setDeletingId(null);
+
         }
+
     };
 
 
+    // =====================================================
+    // RENDER
+    // =====================================================
+
     return (
-        <div>
 
-            {/* Header */}
+        <div className="w-full">
 
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+
+            {/* =================================================
+                HEADER
+            ================================================= */}
+
+            <div className="
+                flex
+                flex-col
+                gap-5
+                sm:flex-row
+                sm:items-center
+                sm:justify-between
+                mb-8
+            ">
 
                 <div>
 
-                    <h2 className="text-3xl font-bold">
+                    <div className="
+                        text-xs
+                        uppercase
+                        tracking-[0.22em]
+                        text-purple-400
+                        font-semibold
+                        mb-2
+                    ">
+                        Portfolio Management
+                    </div>
+
+
+                    <h2 className="
+                        text-3xl
+                        sm:text-4xl
+                        font-bold
+                        text-white
+                    ">
                         Projects
                     </h2>
 
-                    <p className="text-gray-500 mt-1">
-                        Manage your portfolio projects
+
+                    <p className="
+                        mt-2
+                        text-sm
+                        text-zinc-500
+                    ">
+                        Create, update and manage
+                        your portfolio projects.
                     </p>
 
                 </div>
 
 
                 <button
+                    type="button"
                     onClick={handleAdd}
-                    className="px-5 py-3 bg-black text-white rounded-lg"
+                    className="
+                        group
+                        inline-flex
+                        items-center
+                        justify-center
+                        gap-2
+                        rounded-xl
+                        px-5
+                        py-3
+                        font-semibold
+                        text-white
+                        bg-gradient-to-r
+                        from-purple-600
+                        to-cyan-500
+                        shadow-[0_0_25px_rgba(139,92,246,0.18)]
+                        transition-all
+                        duration-300
+                        hover:-translate-y-0.5
+                        hover:shadow-[0_0_35px_rgba(34,211,238,0.20)]
+                    "
                 >
-                    + Add Project
+
+                    <span className="
+                        text-lg
+                        leading-none
+                    ">
+                        +
+                    </span>
+
+                    Add Project
+
                 </button>
 
             </div>
 
 
-            {/* Error */}
+            {/* =================================================
+                SUCCESS MESSAGE
+            ================================================= */}
 
-            {error && (
-                <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-lg">
-                    {error}
+            {success && (
+
+                <div className="
+                    mb-6
+                    rounded-xl
+                    border
+                    border-emerald-400/20
+                    bg-emerald-500/[0.08]
+                    px-5
+                    py-4
+                    text-sm
+                    text-emerald-300
+                ">
+
+                    <div className="
+                        flex
+                        items-center
+                        gap-3
+                    ">
+
+                        <span className="
+                            flex
+                            h-7
+                            w-7
+                            items-center
+                            justify-center
+                            rounded-full
+                            bg-emerald-400/10
+                        ">
+                            ✓
+                        </span>
+
+                        {success}
+
+                    </div>
+
                 </div>
+
             )}
 
 
-            {/* Form */}
+            {/* =================================================
+                ERROR MESSAGE
+            ================================================= */}
+
+            {error && (
+
+                <div className="
+                    mb-6
+                    rounded-xl
+                    border
+                    border-red-400/20
+                    bg-red-500/[0.07]
+                    px-5
+                    py-4
+                    text-sm
+                    text-red-300
+                ">
+
+                    <div className="
+                        flex
+                        items-center
+                        gap-3
+                    ">
+
+                        <span className="
+                            flex
+                            h-7
+                            w-7
+                            items-center
+                            justify-center
+                            rounded-full
+                            bg-red-400/10
+                        ">
+                            !
+                        </span>
+
+                        {error}
+
+                    </div>
+
+                </div>
+
+            )}
+
+
+            {/* =================================================
+                ADD / EDIT FORM
+            ================================================= */}
 
             {showForm && (
 
-                <div className="bg-white border rounded-2xl p-6 mb-8">
+                <div className="
+                    mb-10
+                    overflow-hidden
+                    rounded-2xl
+                    border
+                    border-white/[0.08]
+                    bg-white/[0.025]
+                    shadow-[0_25px_80px_rgba(0,0,0,0.30)]
+                    backdrop-blur-xl
+                ">
 
-                    <div className="flex justify-between items-center mb-6">
+                    {/* Form Header */}
 
-                        <h3 className="text-xl font-bold">
-                            {editingProject
-                                ? "Edit Project"
-                                : "Add Project"}
-                        </h3>
+                    <div className="
+                        flex
+                        items-center
+                        justify-between
+                        border-b
+                        border-white/[0.06]
+                        px-6
+                        py-5
+                        sm:px-8
+                    ">
+
+                        <div>
+
+                            <p className="
+                                text-xs
+                                uppercase
+                                tracking-[0.18em]
+                                text-cyan-400
+                                font-semibold
+                            ">
+                                {editingProject
+                                    ? "Edit Project"
+                                    : "New Project"}
+                            </p>
+
+
+                            <h3 className="
+                                mt-1
+                                text-xl
+                                font-bold
+                                text-white
+                            ">
+                                {editingProject
+                                    ? "Update project details"
+                                    : "Add a new project"}
+                            </h3>
+
+                        </div>
+
 
                         <button
-                            onClick={() => setShowForm(false)}
-                            className="text-gray-500"
+                            type="button"
+                            onClick={handleCancel}
+                            className="
+                                flex
+                                h-9
+                                w-9
+                                items-center
+                                justify-center
+                                rounded-lg
+                                border
+                                border-white/[0.08]
+                                bg-white/[0.03]
+                                text-zinc-400
+                                transition
+                                hover:border-pink-400/30
+                                hover:bg-pink-400/[0.08]
+                                hover:text-pink-300
+                            "
                         >
-                            ✕
+                            ×
                         </button>
 
                     </div>
@@ -373,174 +794,447 @@ const ProjectManager = () => {
 
                     <form
                         onSubmit={handleSubmit}
-                        className="space-y-5"
+                        className="p-6 sm:p-8"
                     >
 
-                        {/* Title */}
+                        <div className="
+                            grid
+                            grid-cols-1
+                            lg:grid-cols-2
+                            gap-6
+                        ">
 
-                        <div>
 
-                            <label className="block text-sm font-medium mb-2">
-                                Project Title
-                            </label>
+                            {/* TITLE */}
 
-                            <input
-                                type="text"
-                                name="title"
-                                value={formData.title}
-                                onChange={handleChange}
-                                required
-                                className="w-full border rounded-lg px-4 py-3"
-                                placeholder="Email Sender"
-                            />
+                            <div className="lg:col-span-2">
+
+                                <label className="
+                                    mb-2
+                                    block
+                                    text-sm
+                                    font-medium
+                                    text-zinc-300
+                                ">
+                                    Project Title
+                                </label>
+
+
+                                <input
+                                    type="text"
+                                    name="title"
+                                    value={formData.title}
+                                    onChange={handleChange}
+                                    required
+                                    placeholder="Email Sender API"
+                                    className="
+                                        admin-input
+                                        w-full
+                                        rounded-xl
+                                        border
+                                        border-white/[0.08]
+                                        bg-black/30
+                                        px-4
+                                        py-3
+                                        text-sm
+                                        text-white
+                                        outline-none
+                                        placeholder:text-zinc-700
+                                        transition
+                                        focus:border-purple-400/50
+                                        focus:ring-2
+                                        focus:ring-purple-500/10
+                                    "
+                                />
+
+                            </div>
+
+
+                            {/* DESCRIPTION */}
+
+                            <div className="lg:col-span-2">
+
+                                <label className="
+                                    mb-2
+                                    block
+                                    text-sm
+                                    font-medium
+                                    text-zinc-300
+                                ">
+                                    Description
+                                </label>
+
+
+                                <textarea
+                                    name="description"
+                                    value={formData.description}
+                                    onChange={handleChange}
+                                    required
+                                    rows="6"
+                                    placeholder="Describe the project, your responsibilities and the main features..."
+                                    className="
+                                        w-full
+                                        resize-none
+                                        rounded-xl
+                                        border
+                                        border-white/[0.08]
+                                        bg-black/30
+                                        px-4
+                                        py-3
+                                        text-sm
+                                        leading-6
+                                        text-white
+                                        outline-none
+                                        placeholder:text-zinc-700
+                                        transition
+                                        focus:border-purple-400/50
+                                        focus:ring-2
+                                        focus:ring-purple-500/10
+                                    "
+                                />
+
+                            </div>
+
+
+                            {/* TECHNOLOGIES */}
+
+                            <div className="lg:col-span-2">
+
+                                <label className="
+                                    mb-2
+                                    block
+                                    text-sm
+                                    font-medium
+                                    text-zinc-300
+                                ">
+                                    Technologies
+                                </label>
+
+
+                                <input
+                                    type="text"
+                                    name="technologies"
+                                    value={formData.technologies}
+                                    onChange={handleChange}
+                                    placeholder="Node.js, Express.js, MongoDB, React"
+                                    className="
+                                        w-full
+                                        rounded-xl
+                                        border
+                                        border-white/[0.08]
+                                        bg-black/30
+                                        px-4
+                                        py-3
+                                        text-sm
+                                        text-white
+                                        outline-none
+                                        placeholder:text-zinc-700
+                                        transition
+                                        focus:border-cyan-400/50
+                                        focus:ring-2
+                                        focus:ring-cyan-400/10
+                                    "
+                                />
+
+
+                                <p className="
+                                    mt-2
+                                    text-xs
+                                    text-zinc-600
+                                ">
+                                    Separate technologies using commas.
+                                </p>
+
+                            </div>
+
+
+                            {/* GITHUB */}
+
+                            <div>
+
+                                <label className="
+                                    mb-2
+                                    block
+                                    text-sm
+                                    font-medium
+                                    text-zinc-300
+                                ">
+                                    GitHub URL
+                                </label>
+
+
+                                <input
+                                    type="url"
+                                    name="github"
+                                    value={formData.github}
+                                    onChange={handleChange}
+                                    placeholder="https://github.com/username/project"
+                                    className="
+                                        w-full
+                                        rounded-xl
+                                        border
+                                        border-white/[0.08]
+                                        bg-black/30
+                                        px-4
+                                        py-3
+                                        text-sm
+                                        text-white
+                                        outline-none
+                                        placeholder:text-zinc-700
+                                        transition
+                                        focus:border-purple-400/50
+                                        focus:ring-2
+                                        focus:ring-purple-500/10
+                                    "
+                                />
+
+                            </div>
+
+
+                            {/* LIVE DEMO */}
+
+                            <div>
+
+                                <label className="
+                                    mb-2
+                                    block
+                                    text-sm
+                                    font-medium
+                                    text-zinc-300
+                                ">
+                                    Live Demo URL
+                                </label>
+
+
+                                <input
+                                    type="url"
+                                    name="liveDemo"
+                                    value={formData.liveDemo}
+                                    onChange={handleChange}
+                                    placeholder="https://yourproject.com"
+                                    className="
+                                        w-full
+                                        rounded-xl
+                                        border
+                                        border-white/[0.08]
+                                        bg-black/30
+                                        px-4
+                                        py-3
+                                        text-sm
+                                        text-white
+                                        outline-none
+                                        placeholder:text-zinc-700
+                                        transition
+                                        focus:border-cyan-400/50
+                                        focus:ring-2
+                                        focus:ring-cyan-400/10
+                                    "
+                                />
+
+                            </div>
+
+
+                            {/* IMAGE */}
+
+                            <div className="lg:col-span-2">
+
+                                <label className="
+                                    mb-2
+                                    block
+                                    text-sm
+                                    font-medium
+                                    text-zinc-300
+                                ">
+                                    Project Image URL
+                                </label>
+
+
+                                <input
+                                    type="url"
+                                    name="image"
+                                    value={formData.image}
+                                    onChange={handleChange}
+                                    placeholder="https://res.cloudinary.com/..."
+                                    className="
+                                        w-full
+                                        rounded-xl
+                                        border
+                                        border-white/[0.08]
+                                        bg-black/30
+                                        px-4
+                                        py-3
+                                        text-sm
+                                        text-white
+                                        outline-none
+                                        placeholder:text-zinc-700
+                                        transition
+                                        focus:border-pink-400/50
+                                        focus:ring-2
+                                        focus:ring-pink-400/10
+                                    "
+                                />
+
+
+                                {/* IMAGE PREVIEW */}
+
+                                {formData.image && (
+
+                                    <div className="
+                                        mt-4
+                                        overflow-hidden
+                                        rounded-xl
+                                        border
+                                        border-white/[0.08]
+                                        bg-black/30
+                                    ">
+
+                                        <img
+                                            src={formData.image}
+                                            alt="Project preview"
+                                            className="
+                                                h-44
+                                                w-full
+                                                object-cover
+                                            "
+                                            onError={(e) => {
+                                                e.currentTarget.style.display =
+                                                    "none";
+                                            }}
+                                        />
+
+                                    </div>
+
+                                )}
+
+                            </div>
+
+
+                            {/* FEATURED */}
+
+                            <div className="
+                                lg:col-span-2
+                                rounded-xl
+                                border
+                                border-white/[0.07]
+                                bg-white/[0.02]
+                                p-4
+                            ">
+
+                                <label className="
+                                    flex
+                                    cursor-pointer
+                                    items-center
+                                    gap-4
+                                ">
+
+                                    <input
+                                        type="checkbox"
+                                        name="featured"
+                                        checked={
+                                            formData.featured
+                                        }
+                                        onChange={
+                                            handleChange
+                                        }
+                                        className="
+                                            h-5
+                                            w-5
+                                            accent-purple-500
+                                        "
+                                    />
+
+
+                                    <div>
+
+                                        <p className="
+                                            text-sm
+                                            font-medium
+                                            text-white
+                                        ">
+                                            Featured Project
+                                        </p>
+
+                                        <p className="
+                                            mt-1
+                                            text-xs
+                                            text-zinc-600
+                                        ">
+                                            Highlight this project
+                                            on your public portfolio.
+                                        </p>
+
+                                    </div>
+
+                                </label>
+
+                            </div>
 
                         </div>
 
 
-                        {/* Description */}
+                        {/* FORM ACTIONS */}
 
-                        <div>
-
-                            <label className="block text-sm font-medium mb-2">
-                                Description
-                            </label>
-
-                            <textarea
-                                name="description"
-                                value={formData.description}
-                                onChange={handleChange}
-                                required
-                                rows="5"
-                                className="w-full border rounded-lg px-4 py-3 resize-none"
-                                placeholder="Describe your project..."
-                            />
-
-                        </div>
-
-
-                        {/* Technologies */}
-
-                        <div>
-
-                            <label className="block text-sm font-medium mb-2">
-                                Technologies
-                            </label>
-
-                            <input
-                                type="text"
-                                name="technologies"
-                                value={formData.technologies}
-                                onChange={handleChange}
-                                className="w-full border rounded-lg px-4 py-3"
-                                placeholder="Node.js, Express.js, MongoDB"
-                            />
-
-                            <p className="text-xs text-gray-500 mt-1">
-                                Separate technologies with commas.
-                            </p>
-
-                        </div>
-
-
-                        {/* GitHub */}
-
-                        <div>
-
-                            <label className="block text-sm font-medium mb-2">
-                                GitHub URL
-                            </label>
-
-                            <input
-                                type="url"
-                                name="github"
-                                value={formData.github}
-                                onChange={handleChange}
-                                className="w-full border rounded-lg px-4 py-3"
-                                placeholder="https://github.com/..."
-                            />
-
-                        </div>
-
-
-                        {/* Live Demo */}
-
-                        <div>
-
-                            <label className="block text-sm font-medium mb-2">
-                                Live Demo URL
-                            </label>
-
-                            <input
-                                type="url"
-                                name="liveDemo"
-                                value={formData.liveDemo}
-                                onChange={handleChange}
-                                className="w-full border rounded-lg px-4 py-3"
-                                placeholder="https://..."
-                            />
-
-                        </div>
-
-
-                        {/* Image */}
-
-                        <div>
-
-                            <label className="block text-sm font-medium mb-2">
-                                Image URL
-                            </label>
-
-                            <input
-                                type="url"
-                                name="image"
-                                value={formData.image}
-                                onChange={handleChange}
-                                className="w-full border rounded-lg px-4 py-3"
-                                placeholder="https://..."
-                            />
-
-                        </div>
-
-
-                        {/* Featured */}
-
-                        <div className="flex items-center gap-3">
-
-                            <input
-                                type="checkbox"
-                                name="featured"
-                                checked={formData.featured}
-                                onChange={handleChange}
-                                className="w-4 h-4"
-                            />
-
-                            <label>
-                                Featured Project
-                            </label>
-
-                        </div>
-
-
-                        {/* Buttons */}
-
-                        <div className="flex gap-3 pt-4">
+                        <div className="
+                            mt-8
+                            flex
+                            flex-col-reverse
+                            gap-3
+                            sm:flex-row
+                            sm:justify-end
+                        ">
 
                             <button
-                                type="submit"
-                                className="px-6 py-3 bg-black text-white rounded-lg"
+                                type="button"
+                                onClick={handleCancel}
+                                disabled={saving}
+                                className="
+                                    rounded-xl
+                                    border
+                                    border-white/[0.08]
+                                    bg-white/[0.025]
+                                    px-6
+                                    py-3
+                                    text-sm
+                                    font-semibold
+                                    text-zinc-400
+                                    transition
+                                    hover:bg-white/[0.06]
+                                    hover:text-white
+                                    disabled:opacity-50
+                                "
                             >
-                                {editingProject
-                                    ? "Update Project"
-                                    : "Create Project"}
+                                Cancel
                             </button>
 
 
                             <button
-                                type="button"
-                                onClick={() => setShowForm(false)}
-                                className="px-6 py-3 border rounded-lg"
+                                type="submit"
+                                disabled={saving}
+                                className="
+                                    rounded-xl
+                                    bg-gradient-to-r
+                                    from-purple-600
+                                    to-cyan-500
+                                    px-7
+                                    py-3
+                                    text-sm
+                                    font-semibold
+                                    text-white
+                                    shadow-[0_0_25px_rgba(139,92,246,0.16)]
+                                    transition-all
+                                    hover:-translate-y-0.5
+                                    hover:shadow-[0_0_35px_rgba(34,211,238,0.18)]
+                                    disabled:cursor-not-allowed
+                                    disabled:opacity-50
+                                "
                             >
-                                Cancel
+
+                                {saving
+                                    ? "Saving..."
+                                    : editingProject
+                                        ? "Update Project"
+                                        : "Create Project"}
+
                             </button>
 
                         </div>
@@ -548,149 +1242,504 @@ const ProjectManager = () => {
                     </form>
 
                 </div>
+
             )}
 
 
-            {/* Loading */}
+            {/* =================================================
+                LOADING
+            ================================================= */}
 
             {loading && (
-                <p className="text-gray-500">
-                    Loading projects...
-                </p>
+
+                <div className="
+                    grid
+                    grid-cols-1
+                    md:grid-cols-2
+                    xl:grid-cols-3
+                    gap-6
+                ">
+
+                    {[1, 2, 3].map(
+                        (item) => (
+
+                            <div
+                                key={item}
+                                className="
+                                    h-[360px]
+                                    animate-pulse
+                                    rounded-2xl
+                                    border
+                                    border-white/[0.06]
+                                    bg-white/[0.025]
+                                "
+                            />
+
+                        )
+                    )}
+
+                </div>
+
             )}
 
 
-            {/* Empty */}
+            {/* =================================================
+                EMPTY STATE
+            ================================================= */}
 
             {!loading &&
                 projects.length === 0 && (
-                    <div className="bg-white border rounded-xl p-10 text-center">
 
-                        <p className="text-gray-500">
-                            No projects found.
+                    <div className="
+                        rounded-2xl
+                        border
+                        border-white/[0.07]
+                        bg-white/[0.025]
+                        px-6
+                        py-16
+                        text-center
+                        backdrop-blur-xl
+                    ">
+
+                        <div className="
+                            mx-auto
+                            flex
+                            h-16
+                            w-16
+                            items-center
+                            justify-center
+                            rounded-2xl
+                            border
+                            border-purple-400/20
+                            bg-purple-500/[0.08]
+                            text-2xl
+                            text-purple-300
+                        ">
+                            ◇
+                        </div>
+
+
+                        <h3 className="
+                            mt-5
+                            text-xl
+                            font-bold
+                            text-white
+                        ">
+                            No projects yet
+                        </h3>
+
+
+                        <p className="
+                            mx-auto
+                            mt-2
+                            max-w-md
+                            text-sm
+                            leading-6
+                            text-zinc-600
+                        ">
+                            Add your first portfolio
+                            project to start building
+                            your showcase.
                         </p>
 
+
                         <button
+                            type="button"
                             onClick={handleAdd}
-                            className="mt-4 px-5 py-2 bg-black text-white rounded-lg"
+                            className="
+                                mt-6
+                                rounded-xl
+                                bg-gradient-to-r
+                                from-purple-600
+                                to-cyan-500
+                                px-6
+                                py-3
+                                text-sm
+                                font-semibold
+                                text-white
+                                transition
+                                hover:-translate-y-0.5
+                            "
                         >
-                            Add Your First Project
+                            + Add Your First Project
                         </button>
 
                     </div>
+
                 )}
 
 
-            {/* Project List */}
+            {/* =================================================
+                PROJECT GRID
+            ================================================= */}
 
             {!loading &&
                 projects.length > 0 && (
 
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="
+                        grid
+                        grid-cols-1
+                        md:grid-cols-2
+                        xl:grid-cols-3
+                        gap-6
+                    ">
 
-                        {projects.map((project) => (
+                        {projects.map(
+                            (project) => (
 
-                            <div
-                                key={project._id}
-                                className="bg-white border rounded-2xl overflow-hidden"
-                            >
+                                <article
+                                    key={
+                                        project._id
+                                    }
+                                    className="
+                                        group
+                                        overflow-hidden
+                                        rounded-2xl
+                                        border
+                                        border-white/[0.07]
+                                        bg-white/[0.025]
+                                        backdrop-blur-xl
+                                        transition-all
+                                        duration-300
+                                        hover:-translate-y-1
+                                        hover:border-purple-400/20
+                                        hover:shadow-[0_20px_60px_rgba(0,0,0,0.30)]
+                                    "
+                                >
 
-                                {/* Image */}
 
-                                {project.image ? (
+                                    {/* IMAGE */}
 
-                                    <img
-                                        src={project.image}
-                                        alt={project.title}
-                                        className="w-full h-44 object-cover"
-                                    />
+                                    <div className="
+                                        relative
+                                        h-48
+                                        overflow-hidden
+                                        bg-black/30
+                                    ">
 
-                                ) : (
+                                        {project.image ? (
 
-                                    <div className="w-full h-44 bg-gray-100 flex items-center justify-center">
+                                            <img
+                                                src={
+                                                    project.image
+                                                }
+                                                alt={
+                                                    project.title
+                                                }
+                                                className="
+                                                    h-full
+                                                    w-full
+                                                    object-cover
+                                                    transition-transform
+                                                    duration-500
+                                                    group-hover:scale-105
+                                                "
+                                            />
 
-                                        <span className="text-gray-400">
-                                            No Image
-                                        </span>
+                                        ) : (
+
+                                            <div className="
+                                                flex
+                                                h-full
+                                                items-center
+                                                justify-center
+                                                bg-gradient-to-br
+                                                from-purple-950/30
+                                                via-black
+                                                to-cyan-950/20
+                                            ">
+
+                                                <span className="
+                                                    text-3xl
+                                                    text-purple-300/50
+                                                ">
+                                                    ◇
+                                                </span>
+
+                                            </div>
+
+                                        )}
+
+
+                                        {/* IMAGE OVERLAY */}
+
+                                        <div className="
+                                            pointer-events-none
+                                            absolute
+                                            inset-0
+                                            bg-gradient-to-t
+                                            from-black/70
+                                            via-transparent
+                                            to-transparent
+                                        " />
+
+
+                                        {/* FEATURED */}
+
+                                        {project.featured && (
+
+                                            <span className="
+                                                absolute
+                                                right-4
+                                                top-4
+                                                rounded-full
+                                                border
+                                                border-pink-400/20
+                                                bg-pink-500/10
+                                                px-3
+                                                py-1
+                                                text-[11px]
+                                                font-semibold
+                                                text-pink-300
+                                                backdrop-blur-md
+                                            ">
+                                                Featured
+                                            </span>
+
+                                        )}
 
                                     </div>
-                                )}
 
 
-                                <div className="p-5">
+                                    {/* CONTENT */}
 
-                                    <div className="flex justify-between gap-3">
+                                    <div className="p-5">
 
-                                        <h3 className="text-xl font-bold">
+
+                                        <h3 className="
+                                            text-xl
+                                            font-bold
+                                            text-white
+                                        ">
                                             {project.title}
                                         </h3>
 
-                                        {project.featured && (
-                                            <span className="text-xs bg-gray-100 px-2 py-1 rounded-full h-fit">
-                                                Featured
-                                            </span>
+
+                                        <p className="
+                                            mt-3
+                                            line-clamp-3
+                                            text-sm
+                                            leading-6
+                                            text-zinc-500
+                                        ">
+                                            {
+                                                project.description
+                                            }
+                                        </p>
+
+
+                                        {/* TECHNOLOGIES */}
+
+                                        {project.technologies?.length >
+                                            0 && (
+
+                                            <div className="
+                                                mt-5
+                                                flex
+                                                flex-wrap
+                                                gap-2
+                                            ">
+
+                                                {project.technologies.map(
+                                                    (
+                                                        technology,
+                                                        index
+                                                    ) => (
+
+                                                        <span
+                                                            key={
+                                                                index
+                                                            }
+                                                            className="
+                                                                rounded-full
+                                                                border
+                                                                border-purple-400/10
+                                                                bg-purple-500/[0.06]
+                                                                px-2.5
+                                                                py-1
+                                                                text-[11px]
+                                                                font-medium
+                                                                text-purple-300
+                                                            "
+                                                        >
+                                                            {
+                                                                technology
+                                                            }
+                                                        </span>
+
+                                                    )
+                                                )}
+
+                                            </div>
+
                                         )}
 
-                                    </div>
 
+                                        {/* LINKS */}
 
-                                    <p className="text-gray-500 text-sm mt-3 line-clamp-3">
-                                        {project.description}
-                                    </p>
+                                        <div className="
+                                            mt-5
+                                            flex
+                                            gap-2
+                                        ">
 
+                                            {project.github && (
 
-                                    <div className="flex flex-wrap gap-2 mt-4">
-
-                                        {project.technologies?.map(
-                                            (technology, index) => (
-
-                                                <span
-                                                    key={index}
-                                                    className="text-xs border px-2 py-1 rounded-full"
+                                                <a
+                                                    href={
+                                                        project.github
+                                                    }
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="
+                                                        flex-1
+                                                        rounded-lg
+                                                        border
+                                                        border-white/[0.07]
+                                                        bg-white/[0.025]
+                                                        px-3
+                                                        py-2
+                                                        text-center
+                                                        text-xs
+                                                        font-semibold
+                                                        text-zinc-400
+                                                        transition
+                                                        hover:border-purple-400/20
+                                                        hover:text-purple-300
+                                                    "
                                                 >
-                                                    {technology}
-                                                </span>
+                                                    GitHub ↗
+                                                </a>
 
-                                            )
-                                        )}
+                                            )}
+
+
+                                            {project.liveDemo && (
+
+                                                <a
+                                                    href={
+                                                        project.liveDemo
+                                                    }
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="
+                                                        flex-1
+                                                        rounded-lg
+                                                        bg-gradient-to-r
+                                                        from-purple-600/80
+                                                        to-cyan-500/80
+                                                        px-3
+                                                        py-2
+                                                        text-center
+                                                        text-xs
+                                                        font-semibold
+                                                        text-white
+                                                        transition
+                                                        hover:opacity-90
+                                                    "
+                                                >
+                                                    Live Demo ↗
+                                                </a>
+
+                                            )}
+
+                                        </div>
+
+
+                                        {/* ACTIONS */}
+
+                                        <div className="
+                                            mt-3
+                                            flex
+                                            gap-2
+                                            border-t
+                                            border-white/[0.06]
+                                            pt-4
+                                        ">
+
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    handleEdit(
+                                                        project
+                                                    )
+                                                }
+                                                className="
+                                                    flex-1
+                                                    rounded-lg
+                                                    border
+                                                    border-white/[0.07]
+                                                    bg-white/[0.02]
+                                                    px-3
+                                                    py-2
+                                                    text-xs
+                                                    font-semibold
+                                                    text-zinc-400
+                                                    transition
+                                                    hover:border-cyan-400/20
+                                                    hover:bg-cyan-400/[0.05]
+                                                    hover:text-cyan-300
+                                                "
+                                            >
+                                                Edit
+                                            </button>
+
+
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    handleDelete(
+                                                        project._id
+                                                    )
+                                                }
+                                                disabled={
+                                                    deletingId ===
+                                                    project._id
+                                                }
+                                                className="
+                                                    flex-1
+                                                    rounded-lg
+                                                    border
+                                                    border-red-400/10
+                                                    bg-red-500/[0.04]
+                                                    px-3
+                                                    py-2
+                                                    text-xs
+                                                    font-semibold
+                                                    text-red-400
+                                                    transition
+                                                    hover:bg-red-500/[0.10]
+                                                    hover:text-red-300
+                                                    disabled:cursor-not-allowed
+                                                    disabled:opacity-50
+                                                "
+                                            >
+
+                                                {deletingId ===
+                                                project._id
+                                                    ? "Deleting..."
+                                                    : "Delete"}
+
+                                            </button>
+
+                                        </div>
 
                                     </div>
 
+                                </article>
 
-                                    <div className="flex gap-3 mt-5">
-
-                                        <button
-                                            onClick={() =>
-                                                handleEdit(project)
-                                            }
-                                            className="flex-1 px-3 py-2 border rounded-lg"
-                                        >
-                                            Edit
-                                        </button>
-
-
-                                        <button
-                                            onClick={() =>
-                                                handleDelete(project._id)
-                                            }
-                                            className="flex-1 px-3 py-2 bg-red-600 text-white rounded-lg"
-                                        >
-                                            Delete
-                                        </button>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        ))}
+                            )
+                        )}
 
                     </div>
+
                 )}
 
         </div>
+
     );
+
 };
+
 
 export default ProjectManager;

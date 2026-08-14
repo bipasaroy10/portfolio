@@ -12,7 +12,7 @@ const projectSchema = new mongoose.Schema({
     },
     image: {
         type: String,
-        default: " ", 
+        default: "", 
     },
     technologies: {
         type: [String],
@@ -20,11 +20,11 @@ const projectSchema = new mongoose.Schema({
     },
     liveDemo: {
         type: String,
-        default: " ",
+        default: "",
     },
     github: {
         type: String,
-        default: " ",
+        default: "",
     },
     featured: {
         type: Boolean,

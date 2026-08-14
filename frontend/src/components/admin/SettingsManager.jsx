@@ -1,20 +1,39 @@
-import { useEffect, useState } from "react";
+import {
+    useEffect,
+    useState
+} from "react";
 
-const API_URL = "http://localhost:5000/api";
+import {
+    getSettings,
+    updateSettings,
+    uploadProfileImage,
+    uploadResume
+} from "../../services/settingsApi";
+
+
+// ============================================================
+// SETTINGS MANAGER
+// ============================================================
 
 const SettingsManager = () => {
 
-    // --------------------------------
-    // Settings Form
-    // --------------------------------
 
-    const [formData, setFormData] = useState({
+    // ========================================================
+    // FORM DATA
+    // ========================================================
+
+    const [
+        formData,
+        setFormData
+    ] = useState({
+
         name: "",
         title: "",
         about: "",
         email: "",
         phone: "",
         location: "",
+
         github: "",
         linkedin: "",
         twitter: "",
@@ -25,62 +44,73 @@ const SettingsManager = () => {
 
         profileImage: "",
         profileImagePublicId: ""
+
     });
 
 
-    // --------------------------------
-    // Files
-    // --------------------------------
+    // ========================================================
+    // FILE STATES
+    // ========================================================
 
-    const [profileImageFile, setProfileImageFile] =
-        useState(null);
-
-    const [resumeFile, setResumeFile] =
-        useState(null);
-
-
-    // --------------------------------
-    // Loading States
-    // --------------------------------
-
-    const [loading, setLoading] =
-        useState(true);
-
-    const [saving, setSaving] =
-        useState(false);
-
-    const [uploadingImage, setUploadingImage] =
-        useState(false);
-
-    const [uploadingResume, setUploadingResume] =
-        useState(false);
+    const [
+        profileImageFile,
+        setProfileImageFile
+    ] = useState(null);
 
 
-    // --------------------------------
-    // Messages
-    // --------------------------------
-
-    const [message, setMessage] =
-        useState("");
-
-    const [error, setError] =
-        useState("");
+    const [
+        resumeFile,
+        setResumeFile
+    ] = useState(null);
 
 
-    // --------------------------------
-    // Get Admin Token
-    // --------------------------------
+    // ========================================================
+    // LOADING STATES
+    // ========================================================
 
-    const getToken = () => {
-        return localStorage.getItem(
-            "adminToken"
-        );
-    };
+    const [
+        loading,
+        setLoading
+    ] = useState(true);
 
 
-    // --------------------------------
-    // Load Settings
-    // --------------------------------
+    const [
+        saving,
+        setSaving
+    ] = useState(false);
+
+
+    const [
+        uploadingImage,
+        setUploadingImage
+    ] = useState(false);
+
+
+    const [
+        uploadingResume,
+        setUploadingResume
+    ] = useState(false);
+
+
+    // ========================================================
+    // MESSAGES
+    // ========================================================
+
+    const [
+        message,
+        setMessage
+    ] = useState("");
+
+
+    const [
+        error,
+        setError
+    ] = useState("");
+
+
+    // ========================================================
+    // LOAD SETTINGS
+    // ========================================================
 
     const loadSettings = async () => {
 
@@ -89,65 +119,58 @@ const SettingsManager = () => {
             setLoading(true);
             setError("");
 
-            const response = await fetch(
-                `${API_URL}/settings`
-            );
 
-            const data =
-                await response.json();
-
-            if (!response.ok) {
-                throw new Error(
-                    data.message ||
-                    "Failed to load settings"
-                );
-            }
+            const response =
+                await getSettings();
 
 
-            if (data.data) {
+            if (
+                response.success &&
+                response.data
+            ) {
 
                 setFormData({
                     name:
-                        data.data.name || "",
+                        response.data.name || "",
 
                     title:
-                        data.data.title || "",
+                        response.data.title || "",
 
                     about:
-                        data.data.about || "",
+                        response.data.about || "",
 
                     email:
-                        data.data.email || "",
+                        response.data.email || "",
 
                     phone:
-                        data.data.phone || "",
+                        response.data.phone || "",
 
                     location:
-                        data.data.location || "",
+                        response.data.location || "",
 
                     github:
-                        data.data.github || "",
+                        response.data.github || "",
 
                     linkedin:
-                        data.data.linkedin || "",
+                        response.data.linkedin || "",
 
                     twitter:
-                        data.data.twitter || "",
+                        response.data.twitter || "",
 
                     website:
-                        data.data.website || "",
+                        response.data.website || "",
 
                     resumeUrl:
-                        data.data.resumeUrl || "",
+                        response.data.resumeUrl || "",
 
                     resumePublicId:
-                        data.data.resumePublicId || "",
+                        response.data.resumePublicId || "",
 
                     profileImage:
-                        data.data.profileImage || "",
+                        response.data.profileImage || "",
 
                     profileImagePublicId:
-                        data.data.profileImagePublicId || ""
+                        response.data.profileImagePublicId || ""
                 });
 
             }
@@ -159,8 +182,10 @@ const SettingsManager = () => {
                 error
             );
 
+
             setError(
-                error.message
+                error.message ||
+                "Failed to load settings"
             );
 
         } finally {
@@ -168,60 +193,74 @@ const SettingsManager = () => {
             setLoading(false);
 
         }
+
     };
 
 
+    // ========================================================
+    // INITIAL LOAD
+    // ========================================================
+
     useEffect(() => {
+
         loadSettings();
+
     }, []);
 
 
-    // --------------------------------
-    // Handle Input
-    // --------------------------------
+    // ========================================================
+    // HANDLE INPUT
+    // ========================================================
 
-    const handleChange = (e) => {
+    const handleChange = (event) => {
 
         const {
             name,
             value
-        } = e.target;
+        } = event.target;
 
-        setFormData((previous) => ({
-            ...previous,
-            [name]: value
-        }));
+
+        setFormData(
+            (previous) => ({
+                ...previous,
+                [name]: value
+            })
+        );
 
     };
 
 
-    // --------------------------------
-    // Profile Image Selection
-    // --------------------------------
+    // ========================================================
+    // PROFILE IMAGE SELECT
+    // ========================================================
 
-    const handleProfileImageChange = (e) => {
+    const handleProfileImageChange = (
+        event
+    ) => {
 
         const file =
-            e.target.files?.[0];
+            event.target.files?.[0];
+
 
         if (!file) {
             return;
         }
 
 
-        // Validate image
-
-        if (!file.type.startsWith("image/")) {
+        if (
+            !file.type.startsWith(
+                "image/"
+            )
+        ) {
 
             setError(
                 "Please select a valid image file."
             );
 
             return;
+
         }
 
-
-        // Validate size - 5MB
 
         if (
             file.size >
@@ -233,6 +272,7 @@ const SettingsManager = () => {
             );
 
             return;
+
         }
 
 
@@ -244,21 +284,22 @@ const SettingsManager = () => {
     };
 
 
-    // --------------------------------
-    // Resume Selection
-    // --------------------------------
+    // ========================================================
+    // RESUME SELECT
+    // ========================================================
 
-    const handleResumeChange = (e) => {
+    const handleResumeChange = (
+        event
+    ) => {
 
         const file =
-            e.target.files?.[0];
+            event.target.files?.[0];
+
 
         if (!file) {
             return;
         }
 
-
-        // Validate PDF
 
         if (
             file.type !==
@@ -270,10 +311,9 @@ const SettingsManager = () => {
             );
 
             return;
+
         }
 
-
-        // Validate size - 5MB
 
         if (
             file.size >
@@ -285,6 +325,7 @@ const SettingsManager = () => {
             );
 
             return;
+
         }
 
 
@@ -296,9 +337,9 @@ const SettingsManager = () => {
     };
 
 
-    // --------------------------------
-    // Upload Profile Image
-    // --------------------------------
+    // ========================================================
+    // UPLOAD PROFILE IMAGE
+    // ========================================================
 
     const handleProfileImageUpload =
         async () => {
@@ -310,6 +351,7 @@ const SettingsManager = () => {
                 );
 
                 return;
+
             }
 
 
@@ -321,69 +363,36 @@ const SettingsManager = () => {
                 setMessage("");
 
 
-                const token =
-                    getToken();
-
-
-                if (!token) {
-
-                    throw new Error(
-                        "Admin authentication token not found."
-                    );
-                }
-
-
-                const uploadData =
-                    new FormData();
-
-
-                uploadData.append(
-                    "profileImage",
-                    profileImageFile
-                );
-
-
                 const response =
-                    await fetch(
-                        `${API_URL}/uploads/profile-image`,
-                        {
-                            method: "POST",
-
-                            headers: {
-                                Authorization:
-                                    `Bearer ${token}`
-                            },
-
-                            body: uploadData
-                        }
+                    await uploadProfileImage(
+                        profileImageFile
                     );
 
 
-                const data =
-                    await response.json();
-
-
-                if (!response.ok) {
+                if (
+                    !response.success ||
+                    !response.data
+                ) {
 
                     throw new Error(
-                        data.message ||
+                        response.message ||
                         "Failed to upload profile image"
                     );
+
                 }
 
 
-                // Save Cloudinary URL + Public ID
-                // into local form state
+                setFormData(
+                    (previous) => ({
+                        ...previous,
 
-                setFormData((previous) => ({
-                    ...previous,
+                        profileImage:
+                            response.data.url,
 
-                    profileImage:
-                        data.data.url,
-
-                    profileImagePublicId:
-                        data.data.publicId
-                }));
+                        profileImagePublicId:
+                            response.data.publicId
+                    })
+                );
 
 
                 setProfileImageFile(null);
@@ -400,6 +409,7 @@ const SettingsManager = () => {
                     error
                 );
 
+
                 setError(
                     error.message ||
                     "Failed to upload profile image"
@@ -410,12 +420,13 @@ const SettingsManager = () => {
                 setUploadingImage(false);
 
             }
+
         };
 
 
-    // --------------------------------
-    // Upload Resume
-    // --------------------------------
+    // ========================================================
+    // UPLOAD RESUME
+    // ========================================================
 
     const handleResumeUpload =
         async () => {
@@ -427,6 +438,7 @@ const SettingsManager = () => {
                 );
 
                 return;
+
             }
 
 
@@ -438,69 +450,36 @@ const SettingsManager = () => {
                 setMessage("");
 
 
-                const token =
-                    getToken();
-
-
-                if (!token) {
-
-                    throw new Error(
-                        "Admin authentication token not found."
-                    );
-                }
-
-
-                const uploadData =
-                    new FormData();
-
-
-                uploadData.append(
-                    "resume",
-                    resumeFile
-                );
-
-
                 const response =
-                    await fetch(
-                        `${API_URL}/uploads/resume`,
-                        {
-                            method: "POST",
-
-                            headers: {
-                                Authorization:
-                                    `Bearer ${token}`
-                            },
-
-                            body: uploadData
-                        }
+                    await uploadResume(
+                        resumeFile
                     );
 
 
-                const data =
-                    await response.json();
-
-
-                if (!response.ok) {
+                if (
+                    !response.success ||
+                    !response.data
+                ) {
 
                     throw new Error(
-                        data.message ||
+                        response.message ||
                         "Failed to upload resume"
                     );
+
                 }
 
 
-                // Save Cloudinary URL + Public ID
-                // into local form state
+                setFormData(
+                    (previous) => ({
+                        ...previous,
 
-                setFormData((previous) => ({
-                    ...previous,
+                        resumeUrl:
+                            response.data.url,
 
-                    resumeUrl:
-                        data.data.url,
-
-                    resumePublicId:
-                        data.data.publicId
-                }));
+                        resumePublicId:
+                            response.data.publicId
+                    })
+                );
 
 
                 setResumeFile(null);
@@ -517,6 +496,7 @@ const SettingsManager = () => {
                     error
                 );
 
+
                 setError(
                     error.message ||
                     "Failed to upload resume"
@@ -527,16 +507,20 @@ const SettingsManager = () => {
                 setUploadingResume(false);
 
             }
+
         };
 
 
-    // --------------------------------
-    // Save Settings
-    // --------------------------------
+    // ========================================================
+    // SAVE SETTINGS
+    // ========================================================
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (
+        event
+    ) => {
 
-        e.preventDefault();
+        event.preventDefault();
+
 
         try {
 
@@ -546,99 +530,70 @@ const SettingsManager = () => {
             setMessage("");
 
 
-            const token =
-                getToken();
-
-
-            if (!token) {
-
-                throw new Error(
-                    "Admin authentication token not found."
-                );
-            }
-
-
             const response =
-                await fetch(
-                    `${API_URL}/settings`,
-                    {
-                        method: "PUT",
-
-                        headers: {
-                            "Content-Type":
-                                "application/json",
-
-                            Authorization:
-                                `Bearer ${token}`
-                        },
-
-                        body:
-                            JSON.stringify(
-                                formData
-                            )
-                    }
+                await updateSettings(
+                    formData
                 );
 
 
-            const data =
-                await response.json();
-
-
-            if (!response.ok) {
+            if (
+                !response.success
+            ) {
 
                 throw new Error(
-                    data.message ||
+                    response.message ||
                     "Failed to update settings"
                 );
+
             }
 
 
-            // Update state with backend response
-
-            if (data.data) {
+            if (response.data) {
 
                 setFormData({
+
                     name:
-                        data.data.name || "",
+                        response.data.name || "",
 
                     title:
-                        data.data.title || "",
+                        response.data.title || "",
 
                     about:
-                        data.data.about || "",
+                        response.data.about || "",
 
                     email:
-                        data.data.email || "",
+                        response.data.email || "",
 
                     phone:
-                        data.data.phone || "",
+                        response.data.phone || "",
 
                     location:
-                        data.data.location || "",
+                        response.data.location || "",
 
                     github:
-                        data.data.github || "",
+                        response.data.github || "",
 
                     linkedin:
-                        data.data.linkedin || "",
+                        response.data.linkedin || "",
 
                     twitter:
-                        data.data.twitter || "",
+                        response.data.twitter || "",
 
                     website:
-                        data.data.website || "",
+                        response.data.website || "",
 
                     resumeUrl:
-                        data.data.resumeUrl || "",
+                        response.data.resumeUrl || "",
 
                     resumePublicId:
-                        data.data.resumePublicId || "",
+                        response.data.resumePublicId || "",
 
                     profileImage:
-                        data.data.profileImage || "",
+                        response.data.profileImage || "",
 
                     profileImagePublicId:
-                        data.data.profileImagePublicId || ""
+                        response.data.profileImagePublicId || ""
+
                 });
 
             }
@@ -655,8 +610,10 @@ const SettingsManager = () => {
                 error
             );
 
+
             setError(
-                error.message
+                error.message ||
+                "Failed to update settings"
             );
 
         } finally {
@@ -664,509 +621,1034 @@ const SettingsManager = () => {
             setSaving(false);
 
         }
+
     };
 
 
-    // --------------------------------
-    // Loading
-    // --------------------------------
+    // ========================================================
+    // LOADING
+    // ========================================================
 
     if (loading) {
 
         return (
-            <div>
 
-                <p className="text-gray-500">
-                    Loading settings...
-                </p>
+            <div
+                className="
+                    min-h-[60vh]
+                    flex
+                    items-center
+                    justify-center
+                "
+            >
+
+                <div
+                    className="
+                        text-center
+                    "
+                >
+
+                    <div
+                        className="
+                            w-12
+                            h-12
+                            mx-auto
+                            rounded-full
+                            border-2
+                            border-white/10
+                            border-t-purple-400
+                            border-r-cyan-400
+                            animate-spin
+                        "
+                    />
+
+                    <p
+                        className="
+                            mt-5
+                            text-sm
+                            text-white/50
+                        "
+                    >
+                        Loading settings...
+                    </p>
+
+                </div>
 
             </div>
+
         );
+
     }
 
 
-    // --------------------------------
+    // ========================================================
     // UI
-    // --------------------------------
+    // ========================================================
 
     return (
-        <div>
 
-            {/* Header */}
+        <div
+            className="
+                relative
+                min-h-full
+                overflow-hidden
+            "
+        >
 
-            <div className="mb-8">
+            {/* ==================================================
+                BACKGROUND GLOWS
+            ================================================== */}
 
-                <h2 className="text-3xl font-bold">
-                    Portfolio Settings
-                </h2>
+            <div
+                className="
+                    pointer-events-none
+                    absolute
+                    -top-40
+                    left-1/4
+                    w-[500px]
+                    h-[400px]
+                    rounded-full
+                    bg-purple-600/10
+                    blur-[120px]
+                "
+            />
 
-                <p className="text-gray-500 mt-1">
-                    Manage your portfolio information
-                </p>
+            <div
+                className="
+                    pointer-events-none
+                    absolute
+                    top-1/2
+                    right-[-180px]
+                    w-[400px]
+                    h-[400px]
+                    rounded-full
+                    bg-cyan-500/10
+                    blur-[120px]
+                "
+            />
 
-            </div>
+            <div
+                className="
+                    pointer-events-none
+                    absolute
+                    bottom-[-180px]
+                    left-1/4
+                    w-[400px]
+                    h-[350px]
+                    rounded-full
+                    bg-pink-500/10
+                    blur-[120px]
+                "
+            />
 
 
-            {/* Success */}
-
-            {message && (
-
-                <div className="mb-6 p-4 bg-green-50 text-green-700 rounded-lg">
-                    {message}
-                </div>
-
-            )}
-
-
-            {/* Error */}
-
-            {error && (
-
-                <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-lg">
-                    {error}
-                </div>
-
-            )}
-
-
-            {/* Form */}
-
-            <form
-                onSubmit={handleSubmit}
-                className="bg-white border rounded-2xl p-6 space-y-6"
+            <div
+                className="
+                    relative
+                    z-10
+                    p-6
+                    md:p-8
+                    lg:p-10
+                "
             >
 
-                {/* -------------------------------- */}
-                {/* Personal Information */}
-                {/* -------------------------------- */}
+                {/* ==================================================
+                    HEADER
+                ================================================== */}
 
-                <div>
+                <div
+                    className="
+                        mb-8
+                        flex
+                        flex-col
+                        md:flex-row
+                        md:items-end
+                        md:justify-between
+                        gap-5
+                    "
+                >
 
-                    <h3 className="text-xl font-bold mb-5">
-                        Personal Information
-                    </h3>
+                    <div>
+
+                        <div
+                            className="
+                                flex
+                                items-center
+                                gap-2
+                                mb-3
+                            "
+                        >
+
+                            <span
+                                className="
+                                    w-8
+                                    h-px
+                                    bg-gradient-to-r
+                                    from-purple-400
+                                    to-cyan-400
+                                "
+                            />
+
+                            <span
+                                className="
+                                    text-xs
+                                    font-semibold
+                                    uppercase
+                                    tracking-[0.25em]
+                                    text-purple-300
+                                "
+                            >
+                                Configuration
+                            </span>
+
+                        </div>
 
 
-                    <div className="grid md:grid-cols-2 gap-5">
+                        <h1
+                            className="
+                                text-3xl
+                                md:text-4xl
+                                font-bold
+                                tracking-tight
+                                text-white
+                            "
+                        >
+                            Portfolio Settings
+                        </h1>
 
-                        {/* Name */}
 
-                        <div>
+                        <p
+                            className="
+                                mt-2
+                                text-sm
+                                text-white/45
+                            "
+                        >
+                            Manage your portfolio
+                            information, social links,
+                            resume and profile image.
+                        </p>
 
-                            <label className="block text-sm font-medium mb-2">
-                                Name
-                            </label>
+                    </div>
 
-                            <input
-                                type="text"
+
+                    <button
+                        type="button"
+                        onClick={loadSettings}
+                        className="
+                            group
+                            inline-flex
+                            items-center
+                            justify-center
+                            gap-2
+                            px-5
+                            py-3
+                            rounded-xl
+                            border
+                            border-white/10
+                            bg-white/[0.03]
+                            text-sm
+                            font-medium
+                            text-white/70
+                            backdrop-blur-xl
+                            transition-all
+                            duration-300
+                            hover:border-cyan-400/30
+                            hover:bg-cyan-400/[0.06]
+                            hover:text-cyan-300
+                        "
+                    >
+
+                        <span
+                            className="
+                                text-lg
+                                transition-transform
+                                duration-500
+                                group-hover:rotate-180
+                            "
+                        >
+                            ↻
+                        </span>
+
+                        Reload
+
+                    </button>
+
+                </div>
+
+
+                {/* ==================================================
+                    SUCCESS
+                ================================================== */}
+
+                {message && (
+
+                    <div
+                        className="
+                            mb-6
+                            rounded-2xl
+                            border
+                            border-emerald-400/20
+                            bg-emerald-400/[0.06]
+                            px-5
+                            py-4
+                            text-sm
+                            text-emerald-300
+                        "
+                    >
+                        {message}
+                    </div>
+
+                )}
+
+
+                {/* ==================================================
+                    ERROR
+                ================================================== */}
+
+                {error && (
+
+                    <div
+                        className="
+                            mb-6
+                            rounded-2xl
+                            border
+                            border-red-400/20
+                            bg-red-400/[0.06]
+                            px-5
+                            py-4
+                            text-sm
+                            text-red-300
+                        "
+                    >
+                        {error}
+                    </div>
+
+                )}
+
+
+                {/* ==================================================
+                    FORM
+                ================================================== */}
+
+                <form
+                    onSubmit={handleSubmit}
+                    className="
+                        space-y-6
+                    "
+                >
+
+
+                    {/* ==================================================
+                        PERSONAL INFORMATION
+                    ================================================== */}
+
+                    <SettingsCard
+                        title="Personal Information"
+                        description="Basic information displayed throughout your portfolio."
+                    >
+
+                        <div
+                            className="
+                                grid
+                                md:grid-cols-2
+                                gap-5
+                            "
+                        >
+
+                            <InputField
+                                label="Name"
                                 name="name"
                                 value={formData.name}
                                 onChange={handleChange}
                                 placeholder="Bipasa Roy"
                                 required
-                                className="w-full border rounded-lg px-4 py-3"
                             />
 
-                        </div>
 
-
-                        {/* Title */}
-
-                        <div>
-
-                            <label className="block text-sm font-medium mb-2">
-                                Professional Title
-                            </label>
-
-                            <input
-                                type="text"
+                            <InputField
+                                label="Professional Title"
                                 name="title"
                                 value={formData.title}
                                 onChange={handleChange}
                                 placeholder="Backend Developer"
                                 required
-                                className="w-full border rounded-lg px-4 py-3"
                             />
 
-                        </div>
 
-
-                        {/* Email */}
-
-                        <div>
-
-                            <label className="block text-sm font-medium mb-2">
-                                Email
-                            </label>
-
-                            <input
-                                type="email"
+                            <InputField
+                                label="Email"
                                 name="email"
+                                type="email"
                                 value={formData.email}
                                 onChange={handleChange}
                                 placeholder="your@email.com"
-                                className="w-full border rounded-lg px-4 py-3"
                             />
 
-                        </div>
 
-
-                        {/* Phone */}
-
-                        <div>
-
-                            <label className="block text-sm font-medium mb-2">
-                                Phone
-                            </label>
-
-                            <input
-                                type="text"
+                            <InputField
+                                label="Phone"
                                 name="phone"
                                 value={formData.phone}
                                 onChange={handleChange}
                                 placeholder="+91 XXXXX XXXXX"
-                                className="w-full border rounded-lg px-4 py-3"
                             />
+
+
+                            <div
+                                className="
+                                    md:col-span-2
+                                "
+                            >
+
+                                <InputField
+                                    label="Location"
+                                    name="location"
+                                    value={formData.location}
+                                    onChange={handleChange}
+                                    placeholder="India"
+                                />
+
+                            </div>
 
                         </div>
 
-
-                        {/* Location */}
-
-                        <div className="md:col-span-2">
-
-                            <label className="block text-sm font-medium mb-2">
-                                Location
-                            </label>
-
-                            <input
-                                type="text"
-                                name="location"
-                                value={formData.location}
-                                onChange={handleChange}
-                                placeholder="India"
-                                className="w-full border rounded-lg px-4 py-3"
-                            />
-
-                        </div>
-
-                    </div>
-
-                </div>
+                    </SettingsCard>
 
 
-                {/* -------------------------------- */}
-                {/* About */}
-                {/* -------------------------------- */}
+                    {/* ==================================================
+                        ABOUT
+                    ================================================== */}
 
-                <div>
+                    <SettingsCard
+                        title="About"
+                        description="Write the introduction visitors will see on your portfolio."
+                    >
 
-                    <h3 className="text-xl font-bold mb-5">
-                        About
-                    </h3>
+                        <textarea
+                            name="about"
+                            value={formData.about}
+                            onChange={handleChange}
+                            rows="7"
+                            placeholder="Write something about yourself..."
+                            className="
+                                w-full
+                                rounded-xl
+                                border
+                                border-white/10
+                                bg-white/[0.035]
+                                px-4
+                                py-3
+                                text-sm
+                                text-white
+                                placeholder:text-white/25
+                                outline-none
+                                resize-none
+                                transition
+                                focus:border-purple-400/40
+                                focus:bg-white/[0.05]
+                                focus:ring-2
+                                focus:ring-purple-500/10
+                            "
+                        />
 
-                    <textarea
-                        name="about"
-                        value={formData.about}
-                        onChange={handleChange}
-                        rows="7"
-                        placeholder="Write something about yourself..."
-                        className="w-full border rounded-lg px-4 py-3 resize-none"
-                    />
-
-                </div>
+                    </SettingsCard>
 
 
-                {/* -------------------------------- */}
-                {/* Social Links */}
-                {/* -------------------------------- */}
+                    {/* ==================================================
+                        SOCIAL LINKS
+                    ================================================== */}
 
-                <div>
+                    <SettingsCard
+                        title="Social Links"
+                        description="Connect your professional profiles and website."
+                    >
 
-                    <h3 className="text-xl font-bold mb-5">
-                        Social Links
-                    </h3>
+                        <div
+                            className="
+                                grid
+                                md:grid-cols-2
+                                gap-5
+                            "
+                        >
 
-
-                    <div className="space-y-5">
-
-                        {/* GitHub */}
-
-                        <div>
-
-                            <label className="block text-sm font-medium mb-2">
-                                GitHub
-                            </label>
-
-                            <input
-                                type="url"
+                            <InputField
+                                label="GitHub"
                                 name="github"
+                                type="url"
                                 value={formData.github}
                                 onChange={handleChange}
                                 placeholder="https://github.com/username"
-                                className="w-full border rounded-lg px-4 py-3"
                             />
 
-                        </div>
 
-
-                        {/* LinkedIn */}
-
-                        <div>
-
-                            <label className="block text-sm font-medium mb-2">
-                                LinkedIn
-                            </label>
-
-                            <input
-                                type="url"
+                            <InputField
+                                label="LinkedIn"
                                 name="linkedin"
+                                type="url"
                                 value={formData.linkedin}
                                 onChange={handleChange}
                                 placeholder="https://linkedin.com/in/username"
-                                className="w-full border rounded-lg px-4 py-3"
                             />
 
-                        </div>
 
-
-                        {/* Twitter */}
-
-                        <div>
-
-                            <label className="block text-sm font-medium mb-2">
-                                Twitter / X
-                            </label>
-
-                            <input
-                                type="url"
+                            <InputField
+                                label="Twitter / X"
                                 name="twitter"
+                                type="url"
                                 value={formData.twitter}
                                 onChange={handleChange}
                                 placeholder="https://x.com/username"
-                                className="w-full border rounded-lg px-4 py-3"
                             />
 
-                        </div>
 
-
-                        {/* Website */}
-
-                        <div>
-
-                            <label className="block text-sm font-medium mb-2">
-                                Website
-                            </label>
-
-                            <input
-                                type="url"
+                            <InputField
+                                label="Website"
                                 name="website"
+                                type="url"
                                 value={formData.website}
                                 onChange={handleChange}
                                 placeholder="https://yourwebsite.com"
-                                className="w-full border rounded-lg px-4 py-3"
                             />
 
                         </div>
+
+                    </SettingsCard>
+
+
+                    {/* ==================================================
+                        RESUME
+                    ================================================== */}
+
+                    <SettingsCard
+                        title="Resume"
+                        description="Upload your latest PDF resume."
+                    >
+
+                        {formData.resumeUrl && (
+
+                            <div
+                                className="
+                                    mb-5
+                                    rounded-xl
+                                    border
+                                    border-white/10
+                                    bg-white/[0.025]
+                                    p-4
+                                "
+                            >
+
+                                <p
+                                    className="
+                                        text-xs
+                                        uppercase
+                                        tracking-wider
+                                        text-white/35
+                                        mb-2
+                                    "
+                                >
+                                    Current Resume
+                                </p>
+
+
+                                <a
+                                    href={
+                                        formData.resumeUrl
+                                    }
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="
+                                        text-sm
+                                        text-cyan-300
+                                        hover:text-cyan-200
+                                        transition
+                                    "
+                                >
+                                    View Current Resume →
+                                </a>
+
+                            </div>
+
+                        )}
+
+
+                        <input
+                            type="file"
+                            accept="application/pdf"
+                            onChange={
+                                handleResumeChange
+                            }
+                            className="
+                                block
+                                w-full
+                                rounded-xl
+                                border
+                                border-white/10
+                                bg-white/[0.035]
+                                px-4
+                                py-3
+                                text-sm
+                                text-white/60
+                                file:mr-4
+                                file:rounded-lg
+                                file:border-0
+                                file:bg-purple-500/15
+                                file:px-4
+                                file:py-2
+                                file:text-sm
+                                file:font-medium
+                                file:text-purple-300
+                            "
+                        />
+
+
+                        {resumeFile && (
+
+                            <p
+                                className="
+                                    mt-3
+                                    text-xs
+                                    text-white/40
+                                "
+                            >
+                                Selected:{" "}
+                                <span className="text-white/70">
+                                    {resumeFile.name}
+                                </span>
+                            </p>
+
+                        )}
+
+
+                        <button
+                            type="button"
+                            onClick={
+                                handleResumeUpload
+                            }
+                            disabled={
+                                uploadingResume ||
+                                !resumeFile
+                            }
+                            className="
+                                mt-4
+                                rounded-xl
+                                border
+                                border-purple-400/20
+                                bg-purple-400/[0.08]
+                                px-5
+                                py-2.5
+                                text-sm
+                                font-medium
+                                text-purple-300
+                                transition
+                                hover:border-purple-400/40
+                                hover:bg-purple-400/[0.14]
+                                disabled:cursor-not-allowed
+                                disabled:opacity-40
+                            "
+                        >
+                            {uploadingResume
+                                ? "Uploading Resume..."
+                                : "Upload Resume"}
+                        </button>
+
+
+                        <p
+                            className="
+                                mt-3
+                                text-xs
+                                text-white/30
+                            "
+                        >
+                            PDF only. Maximum size:
+                            5MB.
+                        </p>
+
+                    </SettingsCard>
+
+
+                    {/* ==================================================
+                        PROFILE IMAGE
+                    ================================================== */}
+
+                    <SettingsCard
+                        title="Profile Image"
+                        description="Upload the image used on your public portfolio."
+                    >
+
+                        {formData.profileImage && (
+
+                            <div className="mb-6">
+
+                                <p
+                                    className="
+                                        mb-3
+                                        text-xs
+                                        uppercase
+                                        tracking-wider
+                                        text-white/35
+                                    "
+                                >
+                                    Current Profile Image
+                                </p>
+
+
+                                <div
+                                    className="
+                                        w-32
+                                        h-32
+                                        rounded-2xl
+                                        overflow-hidden
+                                        border
+                                        border-white/10
+                                        bg-white/[0.03]
+                                        shadow-[0_15px_50px_rgba(0,0,0,0.35)]
+                                    "
+                                >
+
+                                    <img
+                                        src={
+                                            formData.profileImage
+                                        }
+                                        alt="Profile"
+                                        className="
+                                            w-full
+                                            h-full
+                                            object-cover
+                                        "
+                                    />
+
+                                </div>
+
+                            </div>
+
+                        )}
+
+
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={
+                                handleProfileImageChange
+                            }
+                            className="
+                                block
+                                w-full
+                                rounded-xl
+                                border
+                                border-white/10
+                                bg-white/[0.035]
+                                px-4
+                                py-3
+                                text-sm
+                                text-white/60
+                                file:mr-4
+                                file:rounded-lg
+                                file:border-0
+                                file:bg-cyan-400/10
+                                file:px-4
+                                file:py-2
+                                file:text-sm
+                                file:font-medium
+                                file:text-cyan-300
+                            "
+                        />
+
+
+                        {profileImageFile && (
+
+                            <p
+                                className="
+                                    mt-3
+                                    text-xs
+                                    text-white/40
+                                "
+                            >
+                                Selected:{" "}
+                                <span className="text-white/70">
+                                    {profileImageFile.name}
+                                </span>
+                            </p>
+
+                        )}
+
+
+                        <button
+                            type="button"
+                            onClick={
+                                handleProfileImageUpload
+                            }
+                            disabled={
+                                uploadingImage ||
+                                !profileImageFile
+                            }
+                            className="
+                                mt-4
+                                rounded-xl
+                                border
+                                border-cyan-400/20
+                                bg-cyan-400/[0.08]
+                                px-5
+                                py-2.5
+                                text-sm
+                                font-medium
+                                text-cyan-300
+                                transition
+                                hover:border-cyan-400/40
+                                hover:bg-cyan-400/[0.14]
+                                disabled:cursor-not-allowed
+                                disabled:opacity-40
+                            "
+                        >
+                            {uploadingImage
+                                ? "Uploading Image..."
+                                : "Upload Profile Image"}
+                        </button>
+
+
+                        <p
+                            className="
+                                mt-3
+                                text-xs
+                                text-white/30
+                            "
+                        >
+                            JPG, JPEG, PNG, WEBP and
+                            other supported image
+                            formats. Maximum size: 5MB.
+                        </p>
+
+                    </SettingsCard>
+
+
+                    {/* ==================================================
+                        SAVE
+                    ================================================== */}
+
+                    <div
+                        className="
+                            sticky
+                            bottom-4
+                            z-20
+                            flex
+                            justify-end
+                        "
+                    >
+
+                        <button
+                            type="submit"
+                            disabled={saving}
+                            className="
+                                inline-flex
+                                items-center
+                                justify-center
+                                gap-2
+                                rounded-xl
+                                bg-gradient-to-r
+                                from-purple-600
+                                via-purple-500
+                                to-cyan-500
+                                px-7
+                                py-3.5
+                                text-sm
+                                font-semibold
+                                text-white
+                                shadow-[0_15px_45px_rgba(139,92,246,0.2)]
+                                transition-all
+                                duration-300
+                                hover:-translate-y-0.5
+                                hover:shadow-[0_20px_55px_rgba(139,92,246,0.3)]
+                                disabled:cursor-not-allowed
+                                disabled:opacity-50
+                            "
+                        >
+
+                            {saving ? (
+                                <>
+                                    <span
+                                        className="
+                                            w-4
+                                            h-4
+                                            rounded-full
+                                            border-2
+                                            border-white/30
+                                            border-t-white
+                                            animate-spin
+                                        "
+                                    />
+
+                                    Saving...
+
+                                </>
+                            ) : (
+                                <>
+                                    Save Settings
+                                    <span>→</span>
+                                </>
+                            )}
+
+                        </button>
 
                     </div>
 
-                </div>
+                </form>
 
-
-                {/* -------------------------------- */}
-                {/* Resume */}
-                {/* -------------------------------- */}
-
-                <div>
-
-                    <h3 className="text-xl font-bold mb-5">
-                        Resume
-                    </h3>
-
-
-                    {/* Current Resume */}
-
-                    {formData.resumeUrl && (
-
-                        <div className="mb-4 p-4 bg-gray-50 border rounded-lg">
-
-                            <p className="text-sm text-gray-500 mb-2">
-                                Current Resume
-                            </p>
-
-                            <a
-                                href={formData.resumeUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:underline"
-                            >
-                                View Current Resume
-                            </a>
-
-                        </div>
-
-                    )}
-
-
-                    {/* File Input */}
-
-                    <label className="block text-sm font-medium mb-2">
-                        Upload Resume
-                    </label>
-
-                    <input
-                        type="file"
-                        accept="application/pdf"
-                        onChange={handleResumeChange}
-                        className="w-full border rounded-lg px-4 py-3"
-                    />
-
-
-                    {/* Selected File */}
-
-                    {resumeFile && (
-
-                        <p className="text-sm text-gray-500 mt-2">
-                            Selected:{" "}
-                            {resumeFile.name}
-                        </p>
-
-                    )}
-
-
-                    {/* Upload Button */}
-
-                    <button
-                        type="button"
-                        onClick={handleResumeUpload}
-                        disabled={
-                            uploadingResume ||
-                            !resumeFile
-                        }
-                        className="mt-4 px-5 py-2.5 bg-gray-800 text-white rounded-lg disabled:opacity-50"
-                    >
-                        {uploadingResume
-                            ? "Uploading Resume..."
-                            : "Upload Resume"}
-                    </button>
-
-
-                    <p className="text-xs text-gray-500 mt-2">
-                        PDF only. Maximum size: 5MB.
-                    </p>
-
-                </div>
-
-
-                {/* -------------------------------- */}
-                {/* Profile Image */}
-                {/* -------------------------------- */}
-
-                <div>
-
-                    <h3 className="text-xl font-bold mb-5">
-                        Profile Image
-                    </h3>
-
-
-                    {/* Current Image */}
-
-                    {formData.profileImage && (
-
-                        <div className="mb-5">
-
-                            <p className="text-sm text-gray-500 mb-3">
-                                Current Profile Image
-                            </p>
-
-                            <img
-                                src={formData.profileImage}
-                                alt="Profile"
-                                className="w-32 h-32 object-cover rounded-full border"
-                            />
-
-                        </div>
-
-                    )}
-
-
-                    {/* File Input */}
-
-                    <label className="block text-sm font-medium mb-2">
-                        Upload Profile Image
-                    </label>
-
-                    <input
-                        type="file"
-                        accept="image/*"
-                        onChange={
-                            handleProfileImageChange
-                        }
-                        className="w-full border rounded-lg px-4 py-3"
-                    />
-
-
-                    {/* Selected File */}
-
-                    {profileImageFile && (
-
-                        <p className="text-sm text-gray-500 mt-2">
-                            Selected:{" "}
-                            {profileImageFile.name}
-                        </p>
-
-                    )}
-
-
-                    {/* Upload Button */}
-
-                    <button
-                        type="button"
-                        onClick={
-                            handleProfileImageUpload
-                        }
-                        disabled={
-                            uploadingImage ||
-                            !profileImageFile
-                        }
-                        className="mt-4 px-5 py-2.5 bg-gray-800 text-white rounded-lg disabled:opacity-50"
-                    >
-                        {uploadingImage
-                            ? "Uploading Image..."
-                            : "Upload Profile Image"}
-                    </button>
-
-
-                    <p className="text-xs text-gray-500 mt-2">
-                        JPG, JPEG, PNG, WEBP and other image formats. Maximum size: 5MB.
-                    </p>
-
-                </div>
-
-
-                {/* -------------------------------- */}
-                {/* Submit */}
-                {/* -------------------------------- */}
-
-                <div className="pt-4 border-t">
-
-                    <button
-                        type="submit"
-                        disabled={saving}
-                        className="px-6 py-3 bg-black text-white rounded-lg disabled:opacity-50"
-                    >
-                        {saving
-                            ? "Saving..."
-                            : "Save Settings"}
-                    </button>
-
-                </div>
-
-            </form>
+            </div>
 
         </div>
+
     );
+
 };
+
+
+// ============================================================
+// SETTINGS CARD
+// ============================================================
+
+const SettingsCard = ({
+    title,
+    description,
+    children
+}) => {
+
+    return (
+
+        <section
+            className="
+                relative
+                overflow-hidden
+                rounded-2xl
+                border
+                border-white/[0.09]
+                bg-white/[0.025]
+                p-5
+                md:p-7
+                backdrop-blur-xl
+                shadow-[0_20px_60px_rgba(0,0,0,0.2)]
+            "
+        >
+
+            <div
+                className="
+                    pointer-events-none
+                    absolute
+                    top-0
+                    left-0
+                    right-0
+                    h-px
+                    bg-gradient-to-r
+                    from-transparent
+                    via-purple-400/40
+                    to-transparent
+                "
+            />
+
+
+            <div className="mb-6">
+
+                <h2
+                    className="
+                        text-lg
+                        md:text-xl
+                        font-semibold
+                        text-white
+                    "
+                >
+                    {title}
+                </h2>
+
+
+                <p
+                    className="
+                        mt-1
+                        text-sm
+                        text-white/35
+                    "
+                >
+                    {description}
+                </p>
+
+            </div>
+
+
+            {children}
+
+        </section>
+
+    );
+
+};
+
+
+// ============================================================
+// INPUT FIELD
+// ============================================================
+
+const InputField = ({
+    label,
+    name,
+    type = "text",
+    value,
+    onChange,
+    placeholder,
+    required = false
+}) => {
+
+    return (
+
+        <div>
+
+            <label
+                htmlFor={name}
+                className="
+                    mb-2
+                    block
+                    text-xs
+                    font-medium
+                    uppercase
+                    tracking-wider
+                    text-white/45
+                "
+            >
+                {label}
+            </label>
+
+
+            <input
+                id={name}
+                type={type}
+                name={name}
+                value={value}
+                onChange={onChange}
+                placeholder={placeholder}
+                required={required}
+                className="
+                    w-full
+                    rounded-xl
+                    border
+                    border-white/10
+                    bg-white/[0.035]
+                    px-4
+                    py-3
+                    text-sm
+                    text-white
+                    placeholder:text-white/20
+                    outline-none
+                    transition-all
+                    duration-200
+                    focus:border-purple-400/40
+                    focus:bg-white/[0.05]
+                    focus:ring-2
+                    focus:ring-purple-500/10
+                "
+            />
+
+        </div>
+
+    );
+
+};
+
 
 export default SettingsManager;

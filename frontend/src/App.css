@@ -1,184 +1,1696 @@
-.counter {
-  font-size: 16px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: var(--accent);
-  background: var(--accent-bg);
-  border: 2px solid transparent;
-  transition: border-color 0.3s;
-  margin-bottom: 24px;
+/* =========================================================
+   HERO ANIMATIONS
+========================================================= */
 
-  &:hover {
-    border-color: var(--accent-border);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
+.hero-gradient-text {
+    background:
+        linear-gradient(
+            110deg,
+            #c4b5fd 0%,
+            #a78bfa 35%,
+            #67e8f9 72%,
+            #22d3ee 100%
+        );
+
+    -webkit-background-clip: text;
+    background-clip: text;
+
+    color: transparent;
+
+    background-size: 200% 200%;
+
+    animation:
+        heroGradient 6s ease infinite;
 }
 
-.hero {
-  position: relative;
 
-  .base,
-  .framework,
-  .vite {
-    inset-inline: 0;
-    margin: 0 auto;
-  }
+@keyframes heroGradient {
 
-  .base {
-    width: 170px;
-    position: relative;
-    z-index: 0;
-  }
-
-  .framework,
-  .vite {
-    position: absolute;
-  }
-
-  .framework {
-    z-index: 1;
-    top: 34px;
-    height: 28px;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
-      scale(1.4);
-  }
-
-  .vite {
-    z-index: 0;
-    top: 107px;
-    height: 26px;
-    width: auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
-      scale(0.8);
-  }
-}
-
-#center {
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-  place-content: center;
-  place-items: center;
-  flex-grow: 1;
-
-  @media (max-width: 1024px) {
-    padding: 32px 20px 24px;
-    gap: 18px;
-  }
-}
-
-#next-steps {
-  display: flex;
-  border-top: 1px solid var(--border);
-  text-align: left;
-
-  & > div {
-    flex: 1 1 0;
-    padding: 32px;
-    @media (max-width: 1024px) {
-      padding: 24px 20px;
+    0% {
+        background-position: 0% 50%;
     }
-  }
 
-  .icon {
-    margin-bottom: 16px;
-    width: 22px;
-    height: 22px;
-  }
+    50% {
+        background-position: 100% 50%;
+    }
 
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    text-align: center;
-  }
+    100% {
+        background-position: 0% 50%;
+    }
+
 }
 
-#docs {
-  border-right: 1px solid var(--border);
 
-  @media (max-width: 1024px) {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
+/* =========================================================
+   HERO PROFILE
+========================================================= */
+
+.hero-profile {
+    animation:
+        heroProfileFloat 6s ease-in-out infinite;
 }
 
-#next-steps ul {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  gap: 8px;
-  margin: 32px 0 0;
 
-  .logo {
-    height: 18px;
-  }
+@keyframes heroProfileFloat {
 
-  a {
-    color: var(--text-h);
-    font-size: 16px;
-    border-radius: 6px;
-    background: var(--social-bg);
-    display: flex;
-    padding: 6px 12px;
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+
+}
+
+
+/* =========================================================
+   HERO ORBIT
+========================================================= */
+
+.hero-ring {
+    animation:
+        heroRotate 20s linear infinite;
+}
+
+
+.hero-ring-reverse {
+    animation:
+        heroRotateReverse 14s linear infinite;
+}
+
+
+@keyframes heroRotate {
+
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+
+}
+
+
+@keyframes heroRotateReverse {
+
+    from {
+        transform: rotate(360deg);
+    }
+
+    to {
+        transform: rotate(0deg);
+    }
+
+}
+
+
+/* =========================================================
+   HERO ORBIT BACKGROUND
+========================================================= */
+
+.hero-orbit {
+    animation:
+        heroOrbitPulse 8s ease-in-out infinite;
+}
+
+
+.hero-orbit-delay {
+    animation-delay: -3s;
+}
+
+
+@keyframes heroOrbitPulse {
+
+    0%,
+    100% {
+        opacity: 0.35;
+        transform:
+            translate(-50%, -50%)
+            scale(1);
+    }
+
+    50% {
+        opacity: 0.7;
+        transform:
+            translate(-50%, -50%)
+            scale(1.04);
+    }
+
+}
+
+
+/* =========================================================
+   FLOATING CARDS
+========================================================= */
+
+.hero-floating {
+    animation:
+        heroFloating 5s ease-in-out infinite;
+}
+
+
+.hero-floating-delay {
+    animation-delay: -2.5s;
+}
+
+
+@keyframes heroFloating {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
+
+}
+
+
+/* =========================================================
+   SOCIAL ICONS
+========================================================= */
+
+.hero-social {
+    display: inline-flex;
+
     align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    transition: box-shadow 0.3s;
-
-    &:hover {
-      box-shadow: var(--shadow);
-    }
-    .button-icon {
-      height: 18px;
-      width: 18px;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    margin-top: 20px;
-    flex-wrap: wrap;
     justify-content: center;
 
-    li {
-      flex: 1 1 calc(50% - 8px);
-    }
+    width: 38px;
+    height: 38px;
 
-    a {
-      width: 100%;
-      justify-content: center;
-      box-sizing: border-box;
-    }
-  }
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.08
+        );
+
+    border-radius: 11px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.035
+        );
+
+    color: #a1a1aa;
+
+    transition:
+        transform 250ms ease,
+        color 250ms ease,
+        border-color 250ms ease,
+        background 250ms ease,
+        box-shadow 250ms ease;
 }
 
-#spacer {
-  height: 88px;
-  border-top: 1px solid var(--border);
-  @media (max-width: 1024px) {
-    height: 48px;
-  }
+
+.hero-social:hover {
+    transform: translateY(-3px);
+
+    color: #ffffff;
+
+    border-color:
+        rgba(
+            139,
+            92,
+            246,
+            0.35
+        );
+
+    background:
+        rgba(
+            139,
+            92,
+            246,
+            0.10
+        );
+
+    box-shadow:
+        0 8px 25px
+        rgba(
+            139,
+            92,
+            246,
+            0.12
+        );
 }
 
-.ticks {
-  position: relative;
-  width: 100%;
 
-  &::before,
-  &::after {
-    content: '';
+/* =========================================================
+   MOBILE HERO
+========================================================= */
+
+@media (max-width: 640px) {
+
+    .hero-profile {
+        animation-duration: 7s;
+    }
+
+
+    .hero-floating {
+        transform: scale(0.88);
+    }
+
+
+    .hero-floating-delay {
+        transform: scale(0.88);
+    }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .hero-gradient-text,
+    .hero-profile,
+    .hero-ring,
+    .hero-ring-reverse,
+    .hero-orbit,
+    .hero-floating {
+        animation: none;
+    }
+
+}
+
+/* =========================================================
+   ABOUT SECTION EFFECTS
+========================================================= */
+
+.about-glow {
     position: absolute;
-    top: -4.5px;
-    border: 5px solid transparent;
-  }
+    pointer-events: none;
+}
 
-  &::before {
-    left: 0;
-    border-left-color: var(--border);
-  }
-  &::after {
-    right: 0;
-    border-right-color: var(--border);
-  }
+
+/* =========================================================
+   GLASS SHINE
+========================================================= */
+
+.glass-panel::before {
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    pointer-events: none;
+
+    background:
+        linear-gradient(
+            120deg,
+            rgba(255,255,255,0.045),
+            transparent 35%,
+            transparent 65%,
+            rgba(34,211,238,0.025)
+        );
+
+    opacity: 0.7;
+}
+
+
+/* =========================================================
+   CARD LIGHT SWEEP
+========================================================= */
+
+.premium-card::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: -120%;
+
+    width: 80%;
+    height: 100%;
+
+    pointer-events: none;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,0.045),
+            transparent
+        );
+
+    transform: skewX(-20deg);
+
+    transition:
+        left 700ms ease;
+}
+
+
+.premium-card:hover::before {
+    left: 140%;
+}
+
+
+/* =========================================================
+   ABOUT FLOATING GLOW
+========================================================= */
+
+#about .glass-panel {
+    box-shadow:
+        0 25px 80px rgba(0,0,0,0.25),
+        inset 0 1px 0 rgba(255,255,255,0.035);
+}
+
+
+#about .glass-panel:hover {
+    border-color:
+        rgba(139,92,246,0.20);
+
+    box-shadow:
+        0 30px 90px rgba(0,0,0,0.3),
+        0 0 60px rgba(139,92,246,0.045),
+        inset 0 1px 0 rgba(255,255,255,0.045);
+}
+
+
+/* =========================================================
+   ABOUT RESPONSIVE
+========================================================= */
+
+@media (max-width: 640px) {
+
+    #about .premium-container {
+        width: calc(100% - 28px);
+    }
+
+}
+
+
+/* =========================================================
+   SKILLS SECTION
+========================================================= */
+
+.skill-category-button {
+    isolation: isolate;
+}
+
+
+.skill-category-button::after {
+    content: "";
+
+    position: absolute;
+
+    left: -100%;
+    bottom: 0;
+
+    width: 80%;
+    height: 1px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(167,139,250,0.8),
+            rgba(34,211,238,0.8),
+            transparent
+        );
+
+    transition:
+        left 600ms ease;
+}
+
+
+.skill-category-button:hover::after {
+    left: 120%;
+}
+
+
+/* =========================================================
+   SKILL PROGRESS
+========================================================= */
+
+.skill-progress {
+    box-shadow:
+        0 0 15px rgba(139,92,246,0.25);
+
+    transition:
+        width 1.2s cubic-bezier(
+            0.22,
+            1,
+            0.36,
+            1
+        );
+}
+
+
+/* =========================================================
+   PROGRESS SHIMMER
+========================================================= */
+
+.skill-progress::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: -100%;
+
+    width: 50%;
+    height: 100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,0.35),
+            transparent
+        );
+
+    animation:
+        skillShimmer 2.5s ease-in-out infinite;
+}
+
+
+@keyframes skillShimmer {
+
+    0% {
+        left: -100%;
+    }
+
+    50% {
+        left: 150%;
+    }
+
+    100% {
+        left: 150%;
+    }
+
+}
+
+
+/* =========================================================
+   SKILL CARD GLOW
+========================================================= */
+
+#skills .glass-panel {
+    box-shadow:
+        0 25px 80px rgba(0,0,0,0.25),
+        inset 0 1px 0 rgba(255,255,255,0.035);
+}
+
+
+#skills .glass-panel:hover {
+    border-color:
+        rgba(34,211,238,0.12);
+
+    box-shadow:
+        0 30px 90px rgba(0,0,0,0.3),
+        0 0 70px rgba(34,211,238,0.035),
+        inset 0 1px 0 rgba(255,255,255,0.045);
+}
+
+
+/* =========================================================
+   SKILLS MOBILE
+========================================================= */
+
+@media (max-width: 640px) {
+
+    #skills .premium-container {
+        width: calc(100% - 28px);
+    }
+
+
+    .skill-category-button {
+        padding: 16px;
+    }
+
+}
+
+
+
+/* =========================================================
+   PROJECTS SECTION
+========================================================= */
+
+.project-card {
+    isolation: isolate;
+}
+
+
+/* =========================================================
+   PROJECT CARD TOP LIGHT
+========================================================= */
+
+.project-card::before {
+    content: "";
+
+    position: absolute;
+
+    left: 15%;
+    top: 0;
+
+    width: 70%;
+    height: 1px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(167,139,250,0.6),
+            rgba(34,211,238,0.4),
+            transparent
+        );
+
+    opacity: 0.35;
+
+    transition:
+        opacity 400ms ease,
+        width 400ms ease;
+}
+
+
+.project-card:hover::before {
+    width: 90%;
+    left: 5%;
+    opacity: 1;
+}
+
+
+/* =========================================================
+   PROJECT IMAGE
+========================================================= */
+
+.project-image::after {
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    pointer-events: none;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(139,92,246,0.08),
+            transparent 40%,
+            rgba(34,211,238,0.05)
+        );
+
+    opacity: 0;
+
+    transition:
+        opacity 500ms ease;
+}
+
+
+.project-card:hover .project-image::after {
+    opacity: 1;
+}
+
+
+/* =========================================================
+   PROJECT IMAGE ZOOM
+========================================================= */
+
+.project-card img {
+    filter:
+        saturate(0.85)
+        brightness(0.85);
+
+    transition:
+        transform 700ms cubic-bezier(
+            0.22,
+            1,
+            0.36,
+            1
+        ),
+        filter 500ms ease;
+}
+
+
+.project-card:hover img {
+    filter:
+        saturate(1)
+        brightness(1);
+}
+
+
+/* =========================================================
+   PROJECT BUTTON
+========================================================= */
+
+.project-button {
+    position: relative;
+    overflow: hidden;
+}
+
+
+.project-button::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: -120%;
+
+    width: 70%;
+    height: 100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,0.08),
+            transparent
+        );
+
+    transform: skewX(-20deg);
+
+    transition:
+        left 600ms ease;
+}
+
+
+.project-button:hover::before {
+    left: 140%;
+}
+
+
+/* =========================================================
+   PROJECT SECTION GLASS
+========================================================= */
+
+#projects .glass-panel {
+    box-shadow:
+        0 25px 80px rgba(0,0,0,0.25),
+        inset 0 1px 0 rgba(255,255,255,0.035);
+}
+
+
+/* =========================================================
+   PROJECT RESPONSIVE
+========================================================= */
+
+@media (max-width: 640px) {
+
+    #projects .premium-container {
+        width: calc(100% - 28px);
+    }
+
+
+    .project-card {
+        border-radius: 24px;
+    }
+
+
+    .project-image {
+        height: 210px;
+    }
+
+}
+
+
+/* =========================================================
+   EXPERIENCE TIMELINE
+========================================================= */
+
+.experience-item {
+    will-change: transform, opacity;
+}
+
+
+/* =========================================================
+   TIMELINE NODE
+========================================================= */
+
+.experience-node {
+    transition:
+        transform 300ms ease,
+        box-shadow 300ms ease;
+}
+
+
+.experience-item:hover .experience-node {
+    transform:
+        translateX(-50%)
+        scale(1.35);
+
+    box-shadow:
+        0 0 10px rgba(139,92,246,0.8),
+        0 0 30px rgba(34,211,238,0.25);
+}
+
+
+/* =========================================================
+   TIMELINE LINE
+========================================================= */
+
+.experience-line {
+    box-shadow:
+        0 0 12px rgba(139,92,246,0.08);
+}
+
+
+/* =========================================================
+   EXPERIENCE CARD
+========================================================= */
+
+.experience-card {
+    position: relative;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 20px 60px rgba(0,0,0,0.18),
+        inset 0 1px 0 rgba(255,255,255,0.025);
+}
+
+
+.experience-card::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: -120%;
+
+    width: 80%;
+    height: 100%;
+
+    pointer-events: none;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,0.045),
+            transparent
+        );
+
+    transform: skewX(-20deg);
+
+    transition:
+        left 700ms ease;
+}
+
+
+.experience-card:hover::before {
+    left: 140%;
+}
+
+
+/* =========================================================
+   EXPERIENCE CARD TOP ACCENT
+========================================================= */
+
+.experience-card::after {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 12%;
+
+    width: 76%;
+    height: 1px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(139,92,246,0.45),
+            rgba(34,211,238,0.35),
+            transparent
+        );
+
+    opacity: 0.4;
+
+    transition:
+        opacity 400ms ease,
+        width 400ms ease;
+}
+
+
+.experience-card:hover::after {
+    left: 5%;
+    width: 90%;
+    opacity: 1;
+}
+
+
+/* =========================================================
+   EXPERIENCE TECH
+========================================================= */
+
+.experience-tech {
+    position: relative;
+    overflow: hidden;
+}
+
+
+.experience-tech::before {
+    content: "";
+
+    position: absolute;
+
+    left: -100%;
+    top: 0;
+
+    width: 60%;
+    height: 100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(34,211,238,0.08),
+            transparent
+        );
+
+    transform: skewX(-20deg);
+
+    transition:
+        left 500ms ease;
+}
+
+
+.experience-tech:hover::before {
+    left: 130%;
+}
+
+
+/* =========================================================
+   EXPERIENCE MOBILE
+========================================================= */
+
+@media (max-width: 767px) {
+
+    .experience-line {
+        left: 20px;
+    }
+
+
+    .experience-node {
+        left: 20px;
+    }
+
+
+    .experience-card {
+        margin-left: 40px;
+    }
+
+
+    .experience-item:hover .experience-node {
+        transform:
+            translateX(-50%)
+            scale(1.25);
+    }
+
+}
+
+
+/* =========================================================
+   EXPERIENCE DESKTOP
+========================================================= */
+
+@media (min-width: 768px) {
+
+    .experience-item:nth-child(even)
+    .experience-card {
+        border-color:
+            rgba(34,211,238,0.08);
+    }
+
+
+    .experience-item:nth-child(even)
+    .experience-card:hover {
+        border-color:
+            rgba(34,211,238,0.22);
+    }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .experience-item,
+    .experience-node,
+    .experience-card,
+    .experience-tech {
+        transition: none !important;
+    }
+
+    .experience-card::before,
+    .experience-card::after,
+    .experience-tech::before {
+        display: none;
+    }
+
+}
+
+/* =========================================================
+   CONTACT SECTION
+========================================================= */
+
+#contact {
+    position: relative;
+}
+
+
+/* =========================================================
+   CONTACT INFORMATION CARD
+========================================================= */
+
+.contact-info-card {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+
+    padding: 14px;
+
+    border: 1px solid rgba(255,255,255,0.06);
+
+    border-radius: 16px;
+
+    background: rgba(255,255,255,0.02);
+
+    transition:
+        transform 300ms ease,
+        border-color 300ms ease,
+        background 300ms ease;
+}
+
+
+.contact-info-card:hover {
+    transform: translateX(5px);
+
+    border-color:
+        rgba(139,92,246,0.20);
+
+    background:
+        rgba(139,92,246,0.045);
+}
+
+
+/* =========================================================
+   CONTACT ICON
+========================================================= */
+
+.contact-info-icon {
+    display: flex;
+
+    width: 42px;
+    height: 42px;
+
+    flex-shrink: 0;
+
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid rgba(255,255,255,0.06);
+
+    border-radius: 12px;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    transition:
+        transform 300ms ease;
+}
+
+
+.contact-info-card:hover
+.contact-info-icon {
+    transform: scale(1.08);
+}
+
+
+/* =========================================================
+   INPUT GROUP
+========================================================= */
+
+.premium-input-group {
+    position: relative;
+}
+
+
+/* =========================================================
+   INPUT LABEL
+========================================================= */
+
+.premium-input-label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+
+    color: #71717a;
+
+    transition:
+        color 250ms ease;
+}
+
+
+.premium-input-group:focus-within
+.premium-input-label {
+    color: #c4b5fd;
+}
+
+
+/* =========================================================
+   INPUT
+========================================================= */
+
+.premium-input {
+    width: 100%;
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    border-radius: 14px;
+
+    background:
+        rgba(255,255,255,0.025);
+
+    padding:
+        14px 16px;
+
+    color: #f4f4f5;
+
+    font-family: inherit;
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition:
+        border-color 250ms ease,
+        background 250ms ease,
+        box-shadow 250ms ease,
+        transform 250ms ease;
+}
+
+
+.premium-input::placeholder {
+    color: #52525b;
+}
+
+
+.premium-input:hover {
+    border-color:
+        rgba(255,255,255,0.13);
+}
+
+
+.premium-input:focus {
+    border-color:
+        rgba(139,92,246,0.45);
+
+    background:
+        rgba(139,92,246,0.035);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(139,92,246,0.08),
+        0 0 30px
+        rgba(139,92,246,0.06);
+}
+
+
+/* =========================================================
+   TEXTAREA
+========================================================= */
+
+textarea.premium-input {
+    line-height: 1.7;
+}
+
+
+/* =========================================================
+   SUBMIT BUTTON
+========================================================= */
+
+.contact-submit {
+    position: relative;
+
+    overflow: hidden;
+}
+
+
+.contact-submit::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: -120%;
+
+    width: 70%;
+    height: 100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,0.20),
+            transparent
+        );
+
+    transform: skewX(-20deg);
+
+    transition:
+        left 700ms ease;
+}
+
+
+.contact-submit:hover::before {
+    left: 140%;
+}
+
+
+/* =========================================================
+   CONTACT PANEL GLOW
+========================================================= */
+
+#contact .glass-panel {
+    box-shadow:
+        0 25px 80px rgba(0,0,0,0.20),
+        inset 0 1px 0 rgba(255,255,255,0.025);
+}
+
+
+/* =========================================================
+   CONTACT MOBILE
+========================================================= */
+
+@media (max-width: 640px) {
+
+    #contact .premium-container {
+        width: calc(100% - 28px);
+    }
+
+
+    #contact .glass-panel {
+        border-radius: 24px;
+    }
+
+
+    .contact-info-card:hover {
+        transform: none;
+    }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .contact-info-card,
+    .contact-info-icon,
+    .premium-input,
+    .contact-submit {
+        transition: none !important;
+    }
+
+
+    .contact-submit::before {
+        display: none;
+    }
+
+}
+
+/* =========================================================
+   PREMIUM FOOTER
+========================================================= */
+
+footer {
+    position: relative;
+}
+
+
+/* =========================================================
+   GRADIENT TOP LINE
+========================================================= */
+
+.footer-gradient-line {
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(139,92,246,0.7),
+            rgba(34,211,238,0.6),
+            rgba(236,72,153,0.5),
+            transparent
+        );
+
+    background-size: 200% 100%;
+
+    animation:
+        footerGradient 7s linear infinite;
+}
+
+
+@keyframes footerGradient {
+
+    0% {
+        background-position: 0% 50%;
+    }
+
+    100% {
+        background-position: 200% 50%;
+    }
+
+}
+
+
+/* =========================================================
+   FOOTER BRAND
+========================================================= */
+
+.footer-brand {
+    background:
+        linear-gradient(
+            110deg,
+            #ffffff,
+            #c4b5fd,
+            #67e8f9
+        );
+
+    background-clip: text;
+    -webkit-background-clip: text;
+
+    color: transparent;
+
+    transition:
+        filter 300ms ease;
+}
+
+
+.footer-brand:hover {
+    filter:
+        drop-shadow(
+            0 0 18px
+            rgba(139,92,246,0.35)
+        );
+}
+
+
+/* =========================================================
+   FOOTER NAV
+========================================================= */
+
+.footer-nav-link {
+    position: relative;
+}
+
+
+.footer-nav-link:hover {
+    transform: translateX(2px);
+}
+
+
+/* =========================================================
+   SOCIAL BUTTON
+========================================================= */
+
+.footer-social {
+    display: flex;
+
+    width: 40px;
+    height: 40px;
+
+    align-items: center;
+    justify-content: center;
+
+    border:
+        1px solid
+        rgba(255,255,255,0.08);
+
+    border-radius: 12px;
+
+    background:
+        rgba(255,255,255,0.025);
+
+    color: #71717a;
+
+    transition:
+        transform 300ms ease,
+        color 300ms ease,
+        border-color 300ms ease,
+        background 300ms ease,
+        box-shadow 300ms ease;
+}
+
+
+.footer-social:hover {
+    transform:
+        translateY(-4px);
+
+    color: #ffffff;
+
+    border-color:
+        rgba(139,92,246,0.3);
+
+    background:
+        rgba(139,92,246,0.08);
+
+    box-shadow:
+        0 10px 30px
+        rgba(139,92,246,0.12);
+}
+
+
+/* =========================================================
+   RESUME BUTTON
+========================================================= */
+
+.footer-resume {
+    position: relative;
+    overflow: hidden;
+}
+
+
+.footer-resume::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: -120%;
+
+    width: 70%;
+    height: 100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,0.10),
+            transparent
+        );
+
+    transform:
+        skewX(-20deg);
+
+    transition:
+        left 600ms ease;
+}
+
+
+.footer-resume:hover::before {
+    left: 140%;
+}
+
+
+/* =========================================================
+   BACK TO TOP
+========================================================= */
+
+.footer-top-button {
+    display: flex;
+
+    width: 40px;
+    height: 40px;
+
+    align-items: center;
+    justify-content: center;
+
+    border:
+        1px solid
+        rgba(255,255,255,0.08);
+
+    border-radius: 12px;
+
+    background:
+        rgba(255,255,255,0.025);
+
+    color: #71717a;
+
+    cursor: pointer;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transform:
+        translateY(8px);
+
+    transition:
+        opacity 300ms ease,
+        transform 300ms ease,
+        color 300ms ease,
+        border-color 300ms ease,
+        background 300ms ease;
+}
+
+
+.footer-top-visible {
+    opacity: 1;
+
+    pointer-events: auto;
+
+    transform:
+        translateY(0);
+}
+
+
+.footer-top-button:hover {
+    color: #ffffff;
+
+    border-color:
+        rgba(34,211,238,0.3);
+
+    background:
+        rgba(34,211,238,0.07);
+
+    transform:
+        translateY(-4px);
+}
+
+
+/* =========================================================
+   FOOTER MOBILE
+========================================================= */
+
+@media (max-width: 640px) {
+
+    footer .premium-container {
+        width: calc(100% - 28px);
+    }
+
+
+    .footer-social,
+    .footer-top-button {
+        width: 38px;
+        height: 38px;
+    }
+
+}
+
+
+/* =========================================================
+   ADMIN DASHBOARD
+========================================================= */
+
+.admin-dashboard {
+    font-family:
+        "Inter",
+        system-ui,
+        sans-serif;
+}
+
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.admin-sidebar {
+    box-shadow:
+        20px 0 70px rgba(0,0,0,0.15);
+}
+
+
+/* =========================================================
+   ADMIN LOGO
+========================================================= */
+
+.admin-logo {
+    position: relative;
+    overflow: hidden;
+}
+
+
+.admin-logo::after {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: -120%;
+
+    width: 70%;
+    height: 100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,0.25),
+            transparent
+        );
+
+    transform: skewX(-20deg);
+
+    transition:
+        left 700ms ease;
+}
+
+
+.admin-logo:hover::after {
+    left: 140%;
+}
+
+
+/* =========================================================
+   ACTIVE NAVIGATION
+========================================================= */
+
+.admin-nav-active {
+    background:
+        linear-gradient(
+            90deg,
+            rgba(139,92,246,0.09),
+            rgba(34,211,238,0.025)
+        );
+
+    border:
+        1px solid
+        rgba(139,92,246,0.08);
+}
+
+
+/* =========================================================
+   ADMIN PANEL
+========================================================= */
+
+.admin-panel {
+    position: relative;
+
+    overflow: hidden;
+
+    border:
+        1px solid
+        rgba(255,255,255,0.07);
+
+    border-radius: 20px;
+
+    background:
+        rgba(255,255,255,0.025);
+
+    padding: 24px;
+
+    backdrop-filter:
+        blur(18px);
+
+    -webkit-backdrop-filter:
+        blur(18px);
+
+    box-shadow:
+        0 20px 60px rgba(0,0,0,0.16),
+        inset 0 1px 0 rgba(255,255,255,0.02);
+}
+
+
+/* =========================================================
+   STAT CARD
+========================================================= */
+
+.admin-stat-card {
+    box-shadow:
+        0 15px 50px rgba(0,0,0,0.15),
+        inset 0 1px 0 rgba(255,255,255,0.025);
+}
+
+
+.admin-stat-card:hover {
+    box-shadow:
+        0 20px 60px rgba(0,0,0,0.22),
+        0 0 35px rgba(139,92,246,0.05),
+        inset 0 1px 0 rgba(255,255,255,0.035);
+}
+
+
+/* =========================================================
+   SIDEBAR SCROLLBAR
+========================================================= */
+
+.admin-sidebar nav::-webkit-scrollbar {
+    width: 4px;
+}
+
+
+.admin-sidebar nav::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+
+.admin-sidebar nav::-webkit-scrollbar-thumb {
+    background:
+        rgba(139,92,246,0.2);
+
+    border-radius: 999px;
+}
+
+
+/* =========================================================
+   ADMIN RESPONSIVE
+========================================================= */
+
+@media (max-width: 1023px) {
+
+    .admin-sidebar {
+        box-shadow:
+            30px 0 100px rgba(0,0,0,0.5);
+    }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .admin-sidebar,
+    .admin-nav-item,
+    .admin-stat-card,
+    .admin-quick-action {
+        transition: none !important;
+    }
+
 }

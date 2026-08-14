@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-
 import Navbar from "../components/Navbar";
 import Hero from "../components/Hero";
 import About from "../components/About";
@@ -9,85 +7,89 @@ import Experience from "../components/Experience";
 import Contact from "../components/Contact";
 import Footer from "../components/Footer";
 
-import { getSettings } from "../services/settingsApi";
+import { useSettings } from "../context/SettingsContext";
+
 
 const Home = () => {
 
-    const [settings, setSettings] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
-
-    useEffect(() => {
-
-        const loadSettings = async () => {
-
-            try {
-
-                setLoading(true);
-                setError("");
-
-                const data = await getSettings();
-
-                setSettings(data);
-
-            } catch (error) {
-
-                console.error(
-                    "Failed to load settings:",
-                    error
-                );
-
-                setError(
-                    error.message ||
-                    "Failed to load settings"
-                );
-
-            } finally {
-
-                setLoading(false);
-
-            }
-        };
-
-        loadSettings();
-
-    }, []);
+    const {
+        loading,
+        error
+    } = useSettings();
 
 
-    // --------------------------------
-    // Loading
-    // --------------------------------
+    /* =========================================
+       LOADING
+    ========================================= */
 
     if (loading) {
 
         return (
-            <div className="min-h-screen flex items-center justify-center">
+            <div className="min-h-screen bg-[#050507] text-white flex items-center justify-center">
 
-                <p className="text-gray-500">
-                    Loading portfolio...
-                </p>
+                <div className="text-center">
+
+                    <div
+                        className="
+                            w-10
+                            h-10
+                            mx-auto
+                            mb-5
+                            rounded-full
+                            border-2
+                            border-violet-500/20
+                            border-t-violet-400
+                            animate-spin
+                        "
+                    />
+
+                    <p className="text-sm text-zinc-500">
+                        Loading portfolio...
+                    </p>
+
+                </div>
 
             </div>
         );
     }
 
 
-    // --------------------------------
-    // Error
-    // --------------------------------
+    /* =========================================
+       ERROR
+    ========================================= */
 
     if (error) {
 
         return (
-            <div className="min-h-screen flex items-center justify-center px-6">
+            <div className="min-h-screen bg-[#050507] text-white flex items-center justify-center px-6">
 
-                <div className="text-center">
+                <div className="max-w-md text-center">
 
-                    <h2 className="text-2xl font-bold mb-2">
+                    <div
+                        className="
+                            w-14
+                            h-14
+                            mx-auto
+                            mb-5
+                            rounded-2xl
+                            bg-red-500/10
+                            border
+                            border-red-500/20
+                            flex
+                            items-center
+                            justify-center
+                            text-red-400
+                            text-xl
+                        "
+                    >
+                        !
+                    </div>
+
+                    <h1 className="text-2xl font-bold mb-3">
                         Unable to load portfolio
-                    </h2>
+                    </h1>
 
-                    <p className="text-red-500">
+                    <p className="text-zinc-500">
                         {error}
                     </p>
 
@@ -99,39 +101,85 @@ const Home = () => {
 
 
     return (
-        <>
-            <Navbar
-                settings={settings}
-            />
 
-            <main>
+        <div className="portfolio-app">
 
-                <Hero
-                    settings={settings}
+            {/* =====================================
+                BACKGROUND
+            ===================================== */}
+
+            <div className="portfolio-background">
+
+                {/* Grid */}
+
+                <div className="background-grid" />
+
+
+                {/* Purple */}
+
+                <div
+                    className="
+                        background-orb
+                        background-orb-purple
+                    "
                 />
 
-                <About
-                    settings={settings}
+
+                {/* Cyan */}
+
+                <div
+                    className="
+                        background-orb
+                        background-orb-cyan
+                    "
                 />
 
-                <Skills />
 
-                <Projects />
+                {/* Pink */}
 
-                <Experience />
-
-                <Contact
-                    settings={settings}
+                <div
+                    className="
+                        background-orb
+                        background-orb-pink
+                    "
                 />
 
-            </main>
+            </div>
 
-            <Footer
-                settings={settings}
-            />
 
-        </>
+            {/* =====================================
+                CONTENT
+            ===================================== */}
+
+            <div className="content-layer">
+
+                <Navbar />
+
+
+                <main>
+
+                    <Hero />
+
+                    <About />
+
+                    <Skills />
+
+                    <Projects />
+
+                    <Experience />
+
+                    <Contact />
+
+                </main>
+
+
+                <Footer />
+
+            </div>
+
+        </div>
     );
 };
+
 
 export default Home;
